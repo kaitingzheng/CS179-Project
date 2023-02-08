@@ -4,7 +4,7 @@
             "name": "Mac",
             "includePath": [
                 "${workspaceFolder}/**",
-                "/opt/homebrew/include/SDL2"
+                "${workspaceFolder}/googletest/googletest/include"
             ],
             "defines": [],
             "macFrameworkPath": [
