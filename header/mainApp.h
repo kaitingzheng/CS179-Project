@@ -12,7 +12,7 @@ using namespace std;
 enum cellState {USED,NOTEXIST,UNUSED};
 
 struct Container{
-    string name;
+    int weight;
     string description;
     pair<int,int> XY;
 };
@@ -33,6 +33,7 @@ class mainApp{
         string currShipName;
         string currOpName;
         int estimateTimeInMin;
+        string manifestName;
 
         ifstream manifest;
 
@@ -45,7 +46,7 @@ class mainApp{
     public:
         mainApp();
         ~mainApp();
-        void newShip(ifstream);
+        void newShip(string manifest);
         string getShipName();
         string getOpName();
         int getNextMove();
@@ -54,6 +55,8 @@ class mainApp{
         void balance();
         void containerToBeLoaded(int, string);
         void opComments(string);
+
+        Container* getContainer(int, int);
 
 };
 

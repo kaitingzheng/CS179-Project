@@ -1,12 +1,6 @@
 #include <gtest/gtest.h>
 
-TEST(SAMPLETEST, MATH){
-    EXPECT_EQ(1000,1000);
-}
-
-TEST(SAMPLETEST, NOT_EQUAL){
-    ASSERT_NE(100,1000);
-}
+#include "mainAppTest.cpp"
 
 int main(int argc, char **argv) {
   ::testing::InitGoogleTest(&argc, argv);
