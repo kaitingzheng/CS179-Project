@@ -8,26 +8,33 @@
 #include <string>
 #include <unordered_map>
 #include <queue>
+#include <stack>
 
 using namespace std;
 
 enum cellState {USED,NOTEXIST,UNUSED};
 enum CraneState {SHIP,TRUCK,BUFFER};
 
-int ROW_SHIP = 8;
-int COLUMN_SHIP = 12;
 
-int ROW_BUFFER = 4;
-int COLUMN_BUFFER = 24; 
 
-int TIME_FROM_SHIP_TO_TRUCK = 2;
-int TIME_FROM_SHIP_TO_BUFFER = 4;
+struct Container{
+    int weight;
+    string description;
+    pair<int,int> XY;
+    string key;
+    int numContainerAbove;
+};
 
-int NOT_EXIST = -1;
+struct Cell{
+    cellState status;
+    pair<int,int> XY;
+    Container container;
+};
+
 
 struct State{
     Cell ship[8][12];
-    Cell buffer[4][24];
+    stack<Container> buffer;
     vector<Container> toBeUnloaded;
     vector<Container> toBeLoaded;
     int time = 0;
@@ -44,28 +51,12 @@ struct State{
 
     CraneState craneState;
 
-
-
-};
-
-struct Container{
-    int weight;
-    string description;
-    pair<int,int> XY;
-    string key;
-    int numContainerAbove;
-};
-
-struct Cell{
-    cellState status;
-    pair<int,int> XY;
-    Container container;
 };
 
 class Compare{
     public:
         bool operator()(State &a, State &b){
-            return a.cost < b.cost;
+            return a.cost > b.cost;
         }
 };
 
@@ -86,24 +77,37 @@ class mainApp{
         ifstream manifest;
 
         pair<int,int> pinkCell;
+        pair<int,int> pinkCellBuffer;
 
         void writeToLog(string);
         void parseManifest();
         
         
-        int calculateTime(pair<int,int>, pair<int,int>);
+        int calculateTime(pair<int,int>&, pair<int,int>&);
         void calculateNumContainerAbove(int, State&);
         void updateNumContainerAbove(int, int, State&);
         
-        Container getContainerWithKey(string,State&);
-        void moveContainer(int column, Container, State, State&, int);
-        pair<int,int> findHighestColumnBetween(pair<int,int>, pair<int,int>, State&);
+        Container getContainerWithKey(string&,State&);
+        bool moveContainer(int column, Container&, State&, int);
+        pair<int,int> findHighestColumnBetween(pair<int,int>&, pair<int,int>&, State&);
 
         void initNewState();
 
-        void unload_one(State);
-        void load_one(State);
-        void moveToBuffer(State&, Container );
+        void unload_one(State&);
+        void load_one(State&);
+        void moveToBuffer(State&, Container);
+        int calculateEmptyColumn(State&, int);
+
+        int ROW_SHIP = 8;
+        int COLUMN_SHIP = 12;
+
+        int ROW_BUFFER = 4;
+        int COLUMN_BUFFER = 24; 
+
+        int TIME_FROM_SHIP_TO_TRUCK = 2;
+        int TIME_FROM_SHIP_TO_BUFFER = 4;
+
+        int NOT_EXIST = -1;
 
     public:
         mainApp();
@@ -114,7 +118,8 @@ class mainApp{
         int getEstimatedTimeInMin();
         State unload_load(vector<string>&, vector<Container>&);
         void balance();
-        void opComments(string);
+        void opComments(string&);
+        
 
         Container getContainer(int, int);
 

@@ -2,21 +2,26 @@
 #include <fstream>
 #include <string>
 #include <iostream>
+#include <stdlib.h>
+#include <algorithm>
 
 using namespace std;
 
 struct greater_than_key
 {
-    inline bool operator() (const Container* struct1, const Container* struct2)
+    inline bool operator() (const Container &struct1, const Container &struct2)
     {
-        return (struct1->numContainerAbove > struct2->numContainerAbove);
+        return (struct1.numContainerAbove > struct2.numContainerAbove);
     }
 };
 
 // constructor
 mainApp :: mainApp() {
-    pinkCell.first = ROW_SHIP + 1;
+    pinkCell.first = ROW_SHIP;
     pinkCell.second = -1;
+
+    pinkCellBuffer.first = ROW_BUFFER;
+    pinkCellBuffer.second = -1;
 }
 
 string mainApp::getShipName(){
@@ -32,18 +37,6 @@ void mainApp::initNewState(){
     State newInitState;
     initState = newInitState;
     
-    // set all buffer to UNUSED
-    for(int i = 0; i < ROW_BUFFER; i++){
-        for(int j = 0; j < COLUMN_BUFFER; j++){
-            Cell temp;
-            temp.status = UNUSED;
-            temp.XY.first = i;
-            temp.XY.second = j;
-            
-            initState.buffer[i][j] = temp;
-        }
-    }
-
     for(int i = 0; i < COLUMN_SHIP; i++){
         pair<int,int> temp;
         temp.first = NOT_EXIST;
@@ -61,15 +54,22 @@ void mainApp::newShip(string manifest){
     parseManifest();
 
     noContainer.weight = -1;
-    initState.craneLocation.first = -1;
-    initState.craneLocation.second = -1;
     initState.cost = 0;
     initState.time = 0;
+
+    int index = 0;
+    for(unsigned int i = 0; i < manifest.size(); i++){
+        if(manifest[i] == '/'){
+            index = i;
+        }
+    }
+    string shipName = manifest.substr(index+1,manifest.size()-5 - index);
+    
+    this->currShipName = shipName;
 }
 
 void mainApp::parseManifest(){
     manifest.open(manifestName);
-
     if(!manifest.is_open()){
         cout << "File not open" << endl;
         return;
@@ -81,9 +81,6 @@ void mainApp::parseManifest(){
         for(int j = 0; j < 12; j++){
             getline(manifest, currLine);
         
-            // string x = currLine.substr(1,2);
-            // string y = currLine.substr(4,2);
-
             string weight = currLine.substr(10,5);
 
             string description = currLine.substr(18,currLine.size()-1);
@@ -97,7 +94,7 @@ void mainApp::parseManifest(){
                 initState.ship[i][j] = tempCell;
             }
 
-            if(description == "UNUSED"){
+            else if(description == "UNUSED"){
                 Cell tempCell;
                 tempCell.status = UNUSED;
                 tempCell.XY.first = i;
@@ -108,8 +105,7 @@ void mainApp::parseManifest(){
                 if(initState.numOfcontainerInColumn[j].first == NOT_EXIST){
                     initState.numOfcontainerInColumn[j].first = i;
                 }
-
-
+                
             }
 
             else{
@@ -128,8 +124,8 @@ void mainApp::parseManifest(){
 
                 // add to hash map
                 string key = weight+description;
-                initState.hashMapForContainer[key].push_back(container);
                 container.key = key;
+                initState.hashMapForContainer[key].push_back(container);
 
                 // update containerInColumn
                 initState.numOfcontainerInColumn[j].second++;
@@ -144,9 +140,14 @@ void mainApp::parseManifest(){
         }
     }
 
-    for(int i = 0; i < 12; i++){
+    for(int i = 0; i < COLUMN_SHIP; i++){
         calculateNumContainerAbove(i,initState);
     }
+
+}
+
+int mainApp::calculateTime(pair<int,int> &a, pair<int,int> &b){
+    return abs(a.first - b.first) + abs(a.second - b.second);
 }
 
 // For Unit test
@@ -157,7 +158,6 @@ Container mainApp::getContainer(int x, int y){
     return noContainer;
 }
 
-// NEED TO TEST
 void mainApp::calculateNumContainerAbove(int column, State &currState){
     
     int currentNumOfContainer = currState.numOfcontainerInColumn[column].second;
@@ -177,7 +177,7 @@ void mainApp::calculateNumContainerAbove(int column, State &currState){
     }
 }
 
-// NEED TO TEST
+
 void mainApp::updateNumContainerAbove(int column, int numChanged, State &currState){
 
     currState.numOfcontainerInColumn[column].second += numChanged;
@@ -194,53 +194,74 @@ void mainApp::updateNumContainerAbove(int column, int numChanged, State &currSta
         currContainer--;
     }
 
+    // update container in toBeUnloaded
+    for(int i = 0; i < currState.toBeUnloaded.size(); i++){
+        int row = currState.toBeUnloaded[i].XY.first;
+        int column = currState.toBeUnloaded[i].XY.second;
+        
+        currState.toBeUnloaded[i].numContainerAbove = currState.ship[row][column].container.numContainerAbove;
+    }
+
 }
 
-// NEED TO TEST
-// return container with key that has the least container above it, removes from hashmap
-Container mainApp::getContainerWithKey(string key, State &currState){
+
+// return container with key that has the least container above it
+Container mainApp::getContainerWithKey(string &key, State &currState){
     vector<Container> temp = currState.hashMapForContainer[key];
+    
     sort(temp.begin(), temp.end(), greater_than_key());
     Container unload = temp[temp.size()-1];
+    
+    // update numOfContainerAbove
+    pair<int,int> a = unload.XY;
+    int numAbove = currState.ship[a.first][a.second].container.numContainerAbove;
+    unload.numContainerAbove = numAbove;
 
-    temp.pop_back();
+
     return unload;
 }
 
-// NEED TO TEST
-pair<int,int> mainApp::findHighestColumnBetween(pair<int,int> orig, pair<int,int> dest, State &currState){
+
+pair<int,int> mainApp::findHighestColumnBetween(pair<int,int> &orig, pair<int,int> &dest, State &currState){
     int left = dest.second;
     int right = orig.second;
+    pair<int,int> highestColumnBetween;
     if(left > right){
         left = orig.first;
         right = dest.first;
     }
 
+    if(abs(orig.second - dest.second) <=1 ){
+        highestColumnBetween.first = max(orig.first,dest.first);
+        highestColumnBetween.second = max(orig.second, dest.second);
+        return highestColumnBetween;
+    }
+
     int highestColumn = left;
 
-    // find the highest column between crane and container
     for(int i = left+1; i < right; i++){
         if(left == -1){
             i++;
         }
-        if(currState.numOfcontainerInColumn[highestColumn].first-1 < currState.numOfcontainerInColumn[i].first-1){
+        if(currState.numOfcontainerInColumn[highestColumn].first-1 < currState.numOfcontainerInColumn[i].first){
             highestColumn = i;
         }
     }
-    pair<int,int> highestColumnBetween;
+    
     highestColumnBetween.second = highestColumn;
-    highestColumnBetween.first = currState.numOfcontainerInColumn[highestColumn].first;
+    highestColumnBetween.first = currState.numOfcontainerInColumn[highestColumn].first-1;
     
     return highestColumnBetween;
 }
 
-// NEED TO TEST
+
 // status 1 = moving to truck
 // status -1 = move to buffer
 // status 0 = move within ship
-void mainApp::moveContainer(int destColumn, Container container, State currState, State &newState ,int status){
+// status 2 = truck to ship
+// status 3 = buffer to ship
+bool mainApp::moveContainer(int destColumn, Container &container, State &currState ,int status){
     
-    int highestColumn = -1;
     pair<int,int> dest;
     dest.first = currState.numOfcontainerInColumn[destColumn].first;
     dest.second = destColumn;
@@ -249,39 +270,56 @@ void mainApp::moveContainer(int destColumn, Container container, State currState
 
     int timeToMoveCrane = 0;
 
-    // check if crane is currently at orig position
-    if(currState.craneLocation.first != orig.first || currState.craneLocation.second != orig.second){
-        // not at orig position, move crane to orig position
-        pair<int,int> cranePos = currState.craneLocation;
-        
-        pair<int,int> highestColumnBetween = findHighestColumnBetween(cranePos,orig,currState);
-
-        timeToMoveCrane += calculateTime(cranePos,highestColumnBetween);
-        timeToMoveCrane += calculateTime(highestColumnBetween,orig);
-
-        cranePos = orig;
-        currState.craneLocation = cranePos;
-    }
+    bool moved = true;
     
+    pair<int,int> cranePos = currState.craneLocation;
+
+    // ship to truck
     int timeToMove = 0;
     if(status == 1){
-        timeToMove += calculateTime(orig,pinkCell) + TIME_FROM_SHIP_TO_TRUCK;
+
+        if(currState.craneState == TRUCK){
+            currState.craneState = SHIP;
+            currState.time+= TIME_FROM_SHIP_TO_TRUCK;
+            currState.craneLocation = pinkCell;
+        }
+        if(currState.craneState == BUFFER){
+            timeToMove += calculateTime(cranePos,pinkCellBuffer);
+            currState.craneState = SHIP;
+            currState.time += TIME_FROM_SHIP_TO_BUFFER;
+            currState.craneLocation = pinkCell;
+
+        }
+        if(currState.craneState == SHIP){
+            currState.craneState = TRUCK;
+            currState.time+= TIME_FROM_SHIP_TO_TRUCK;
+            timeToMoveCrane += calculateTime(cranePos,orig);
+
+            
+        }
+        
+        timeToMove += calculateTime(orig,pinkCell);
         currState.craneLocation = pinkCell;
-        currState.craneState = TRUCK;
         currState.ship[container.XY.first][container.XY.second].status = UNUSED;
+
 
         updateNumContainerAbove(orig.second,-1,currState);
         
     }
+    // ship to buffer
     else if(status == -1){
+        timeToMoveCrane += calculateTime(orig, cranePos);
         timeToMove += calculateTime(orig,pinkCell) + TIME_FROM_SHIP_TO_BUFFER;
-        currState.craneLocation = pinkCell;
+        currState.craneLocation = pinkCellBuffer;
         currState.craneState = BUFFER;
         currState.ship[container.XY.first][container.XY.second].status = UNUSED;
+        
+
         moveToBuffer(currState,container);
 
         updateNumContainerAbove(orig.second,-1,currState);
     }
+    // within ship
     else if(status == 0){
         // check if column we are moving to has enough space
         if(currState.numOfcontainerInColumn[destColumn].first < ROW_SHIP){
@@ -289,6 +327,14 @@ void mainApp::moveContainer(int destColumn, Container container, State currState
             pair<int,int> highestColumnBetween = findHighestColumnBetween(dest,orig,currState);
             timeToMove += calculateTime(orig,highestColumnBetween);
             timeToMove += calculateTime(highestColumnBetween,dest);
+
+            if(currState.craneState == TRUCK){
+                currState.craneState = SHIP;
+                currState.time+=TIME_FROM_SHIP_TO_TRUCK;
+            }
+            if(currState.craneState == SHIP){
+                timeToMoveCrane = calculateTime(cranePos,orig);
+            }
 
             currState.craneState = SHIP;
             
@@ -302,24 +348,98 @@ void mainApp::moveContainer(int destColumn, Container container, State currState
             // update state
             updateNumContainerAbove(orig.second, -1, currState);
             updateNumContainerAbove(dest.second, 1, currState);
-            }
+        }
+        else{
+            moved = false;
+        }
     }
+    // truck to ship
+    else if(status == 2){
+        
+        // check if column we are moving to has enough space
+        if(currState.numOfcontainerInColumn[destColumn].first < ROW_SHIP){
 
-    currState.time = timeToMove + timeToMoveCrane;
-    currState.cost = currState.time * (currState.toBeLoaded.size() + currState.toBeUnloaded.size());
-    newState = currState;
+            if(currState.craneState == SHIP){
+                currState.craneState = TRUCK;
+                currState.time+=TIME_FROM_SHIP_TO_TRUCK;
+                timeToMoveCrane += calculateTime(cranePos,pinkCell);
+            }
+            if(currState.craneState == BUFFER){
+                currState.craneState = SHIP;
+                currState.time+=TIME_FROM_SHIP_TO_BUFFER;
+                timeToMoveCrane += calculateTime(cranePos,pinkCellBuffer);
+                currState.craneLocation = pinkCell;
+
+            }
+            if(currState.craneState == TRUCK){
+                currState.craneState = SHIP;
+                currState.time+=TIME_FROM_SHIP_TO_TRUCK;
+            }
+            
+            currState.craneLocation = dest;
+
+            timeToMove += calculateTime(pinkCell, dest);
+            currState.ship[dest.first][dest.second].status = USED;
+            currState.ship[dest.first][dest.second].container = container;
+
+            
+            container.XY = dest;
+
+
+            // update state
+            updateNumContainerAbove(dest.second, 1, currState);
+        }
+        else{
+                moved = false;
+        }
+    }
+    // buffer to ship
+    else if(status == 3){
+
+        if(currState.craneState == SHIP){
+            currState.craneState = BUFFER;
+            currState.time+=TIME_FROM_SHIP_TO_BUFFER;
+            timeToMove+=calculateTime(cranePos,pinkCell);
+        }
+        if(currState.craneState == TRUCK){
+            currState.craneState = BUFFER;
+           timeToMoveCrane+=TIME_FROM_SHIP_TO_BUFFER;
+        }
+        timeToMove += calculateTime(pinkCellBuffer, container.XY);
+
+        int emptyColumn = calculateEmptyColumn(currState, -1);
+        moveContainer(emptyColumn,container,currState,2);
+    }
+    currState.time += timeToMove + timeToMoveCrane;
+    currState.cost = currState.time;
+
+
+    return moved;
 }
 
 void mainApp::moveToBuffer(State &currState, Container container){
-    for(int i = 0; i < COLUMN_BUFFER;i++){
-        for(int j = 0; j < ROW_BUFFER; j++){
-            if(currState.buffer[j][i].status == UNUSED){
-                currState.buffer[j][i].container = container;
-            }
-        }
-    }
-}
 
+    if(currState.buffer.empty()){
+        container.XY.first == 0;
+        container.XY.second == 0;
+        currState.buffer.push(container);
+    }
+    else{
+        Container topContainer = currState.buffer.top();
+        
+        if(topContainer.XY.first+1 >= ROW_BUFFER){
+            container.XY.first == 0;
+            container.XY.second == topContainer.XY.second+1;
+        }
+        else{
+            container.XY.first = topContainer.XY.first+1;
+            container.XY.second == topContainer.XY.second;
+        }
+        currState.buffer.push(container);
+    }
+    currState.craneLocation = container.XY;
+    currState.time += calculateTime(pinkCellBuffer, container.XY);
+}
 
 State mainApp::unload_load(vector<string> &toBeUnloaded, vector<Container> &toBeLoaded){
 
@@ -327,58 +447,69 @@ State mainApp::unload_load(vector<string> &toBeUnloaded, vector<Container> &toBe
     for(int i = 0; i < toBeUnloaded.size(); i++){
         initState.toBeUnloaded.push_back(getContainerWithKey(toBeUnloaded[i],initState));
     }
-    
     // sort container from biggest to smallest
     sort(initState.toBeUnloaded.begin(), initState.toBeUnloaded.end(), greater_than_key());
     initState.toBeLoaded  = toBeLoaded;
-
+   
     bestState.emplace(initState);
 
     State currState;
     
-    // unload only
-    if(currState.toBeUnloaded.size() > 0 && currState.toBeLoaded.size() == 0 ){
+    while(bestState.size() > 0){
         
-        while(bestState.size() > 0){
-            currState = bestState.top();
-            bestState.pop();
-            
-            if(currState.toBeUnloaded.size() == 0){
-                // found best solution
-                return currState;
-            }
+        currState = bestState.top();
+        bestState.pop();
+
+
+        if(currState.toBeLoaded.size() == 0 && currState.toBeUnloaded.size() == 0 && currState.buffer.empty()){
+            // found best solution
+            return currState;
+        }
+
+        // unload only
+        else if(currState.toBeUnloaded.size() > 0 && currState.toBeLoaded.size() == 0 ){
             unload_one(currState);
         }
-    }
 
-    // load only
-    if(currState.toBeLoaded.size() > 0 && currState.toBeUnloaded.size() == 0 ){
-        
-        while(bestState.size() > 0){
-            currState = bestState.top();
-            bestState.pop();
-            
-            if(currState.toBeLoaded.size() == 0){
-                // found best solution
-                return currState;
-            }
+        // load only
+        else if(currState.toBeLoaded.size() > 0 && currState.toBeUnloaded.size() == 0 ){
+  
             load_one(currState);
         }
-    }
 
-    // from ship to buffer
-    // from buffer to ship
+        // load and unload
+        else if(currState.toBeLoaded.size() > 0 && currState.toBeUnloaded.size() > 0 ){
+            // crane on ship then unload
+            if(currState.craneState == SHIP){
+                unload_one(currState);
+            }
+            // crane on truck then load
+            else if(currState.craneState == TRUCK){
+                load_one(currState);
+            }
+            
+        }
+
+        // buffer to ship
+        else if(!currState.buffer.empty()){
+            Container currContainer = currState.buffer.top();
+            currState.buffer.pop();
+            moveContainer(-1,currContainer,currState,3);
+            bestState.emplace(currState);
+        }
+
+    }
     
     
+    return initState;
 }
 
-void mainApp::unload_one(State currState){
+void mainApp::unload_one(State &currState){
     sort(currState.toBeUnloaded.begin(),currState.toBeUnloaded.end(),greater_than_key());
 
     Container currContainer = currState.toBeUnloaded.at(currState.toBeUnloaded.size()-1);
 
     if(currContainer.numContainerAbove > 0){
-        // move container to each column
         
         int row = currState.numOfcontainerInColumn[currContainer.XY.second].first-1;
         int column = currContainer.XY.second;
@@ -389,23 +520,108 @@ void mainApp::unload_one(State currState){
             State newState;
             // not in the same column
             if(i != currContainer.XY.second){
-                moveContainer(i,topContainer,currState,newState,0);
-                // check if a move was made
-                if(newState.cost != currState.cost){
+                newState = currState;
+                int emptyColumn = calculateEmptyColumn(currState,currContainer.XY.second);
+
+                if(emptyColumn == -2){
+                    moveContainer(emptyColumn,topContainer,newState,-1);
+                    bestState.emplace(newState);
+                    break;
+                }
+                // found a column that we can put on
+                else if(emptyColumn != -1){
+                    moveContainer(emptyColumn,topContainer,newState,0);
+                    bestState.emplace(newState);
+                    break;
+                }
+                else{
+                    moveContainer(i,topContainer,newState,0);
                     bestState.emplace(newState);
                 }
             }
         }
-        // move to buffer -- TODO
 
     }
     else{
         State newState;
-        moveContainer(0,currContainer,currState,newState,1);
+        newState = currState;
+        moveContainer(0,currContainer,newState,1);
+        newState.toBeUnloaded.pop_back();
+
+
         bestState.emplace(newState);
+
     }
 }
 
-void mainApp::load_one(State currState){
+void mainApp::load_one(State &currState){
+    Container currContainer = currState.toBeLoaded.at(currState.toBeLoaded.size()-1);
+
+    for(int i = 0; i < COLUMN_SHIP; i++){
+        State newState;
+        newState = currState;
+        
+        int emptyColumn = calculateEmptyColumn(currState, -1);
+        
+        // nothing to load, place where ever is free
+        if(currState.toBeUnloaded.size() == 0){
+            if(moveContainer(emptyColumn,currContainer,newState,2)){
+                newState.toBeLoaded.pop_back();
+                bestState.emplace(newState);
+                break;
+            }
+        }
+
+        // have something to load, but there are free column to use
+        else if(emptyColumn != -1){
+            moveContainer(emptyColumn,currContainer,newState,2);
+            newState.toBeLoaded.pop_back();
+            bestState.emplace(newState);
+            break;
+        } 
+        
+        // no free column to use, try to place in every column
+        else if(moveContainer(i,currContainer,newState,2)){
+            newState.toBeLoaded.pop_back();
+            bestState.emplace(newState);
+        }
+    }
+
+}
+
+// return -1 if all column have container we need to unload
+// return -2 if all column are full then need to move to buffer
+int mainApp::calculateEmptyColumn(State& currState, int column){
+    bool arr[12] = {false};
+    int index = -1;
+    bool isFull = true;
+    for(int i = 0; i < currState.toBeUnloaded.size(); i++){
+        arr[currState.toBeUnloaded[i].XY.second] = true;
+    }
+
+    for(int i = 0; i < COLUMN_SHIP; i++){
+        if(arr[i] == false && currState.numOfcontainerInColumn[i].first < ROW_SHIP && i != column){
+            if(column == -1){
+                return i;
+            }
+            else if(index == -1){
+                index = i;
+            }
+            else if(abs(i - column) < abs(index - column)){
+                index = i;
+            }
+        }
+    }
     
+    for(int i = 0; i < COLUMN_SHIP; i++){
+        if(currState.ship[ROW_SHIP-1][i].status == UNUSED && i != column){
+            isFull = false;
+        }
+    }
+
+    if(isFull){
+        return -2;
+    }
+
+    return index;
 }
