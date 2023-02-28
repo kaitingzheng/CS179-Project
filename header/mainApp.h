@@ -97,6 +97,7 @@ class mainApp{
         void load_one(State&);
         void moveToBuffer(State&, Container);
         int calculateEmptyColumn(State&, int);
+        void addMoveOrder(State&, pair<int,int>,pair<int,int>,pair<int,int>);
 
         int ROW_SHIP = 8;
         int COLUMN_SHIP = 12;
@@ -122,6 +123,8 @@ class mainApp{
         
 
         Container getContainer(int, int);
+
+
 
 };
 

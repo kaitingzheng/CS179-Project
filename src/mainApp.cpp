@@ -302,6 +302,8 @@ bool mainApp::moveContainer(int destColumn, Container &container, State &currSta
         currState.craneLocation = pinkCell;
         currState.ship[container.XY.first][container.XY.second].status = UNUSED;
 
+        addMoveOrder(currState,orig,pinkCell,pinkCell);
+
 
         updateNumContainerAbove(orig.second,-1,currState);
         
@@ -314,7 +316,7 @@ bool mainApp::moveContainer(int destColumn, Container &container, State &currSta
         currState.craneState = BUFFER;
         currState.ship[container.XY.first][container.XY.second].status = UNUSED;
         
-
+        addMoveOrder(currState,orig,pinkCell,pinkCell);
         moveToBuffer(currState,container);
 
         updateNumContainerAbove(orig.second,-1,currState);
@@ -348,6 +350,8 @@ bool mainApp::moveContainer(int destColumn, Container &container, State &currSta
             // update state
             updateNumContainerAbove(orig.second, -1, currState);
             updateNumContainerAbove(dest.second, 1, currState);
+
+            addMoveOrder(currState,orig,highestColumnBetween,dest);
         }
         else{
             moved = false;
@@ -384,6 +388,8 @@ bool mainApp::moveContainer(int destColumn, Container &container, State &currSta
 
             
             container.XY = dest;
+            
+            addMoveOrder(currState,pinkCell,pinkCell,dest);
 
 
             // update state
@@ -406,12 +412,14 @@ bool mainApp::moveContainer(int destColumn, Container &container, State &currSta
            timeToMoveCrane+=TIME_FROM_SHIP_TO_BUFFER;
         }
         timeToMove += calculateTime(pinkCellBuffer, container.XY);
+        addMoveOrder(currState,currState.buffer.top().XY,pinkCellBuffer,pinkCellBuffer);
 
         int emptyColumn = calculateEmptyColumn(currState, -1);
         moveContainer(emptyColumn,container,currState,2);
     }
     currState.time += timeToMove + timeToMoveCrane;
     currState.cost = currState.time;
+
 
 
     return moved;
@@ -439,6 +447,7 @@ void mainApp::moveToBuffer(State &currState, Container container){
     }
     currState.craneLocation = container.XY;
     currState.time += calculateTime(pinkCellBuffer, container.XY);
+    addMoveOrder(currState,pinkCellBuffer,pinkCellBuffer,currState.buffer.top().XY);
 }
 
 State mainApp::unload_load(vector<string> &toBeUnloaded, vector<Container> &toBeLoaded){
@@ -624,4 +633,51 @@ int mainApp::calculateEmptyColumn(State& currState, int column){
     }
 
     return index;
+}
+
+void mainApp::addMoveOrder(State &currState, pair<int,int> orig, pair<int,int> midPoint, pair<int,int> dest){
+    vector<pair<int,int>> moveOrder;
+
+    moveOrder.push_back(orig);
+
+    while(orig != midPoint){
+        // check if mid point is above orig, if above then we have to go up and over
+        if(midPoint.first > orig.first){
+            orig.first++;
+        }
+        // midpoint is on the left
+        else if(orig.second > midPoint.second){
+            orig.second--;
+        }
+        // midpoing is on the right
+        else if(orig.second < midPoint.second){
+            orig.second++;
+        }
+        moveOrder.push_back(orig);
+    }
+
+    while(orig != dest){
+
+
+        // dest is on the left
+        if(orig.second > dest.second){
+            orig.second--;
+        }
+        // dest is on the right
+        else if(orig.second < dest.second){
+            orig.second++;
+        }
+        // same column as dest but dest is below
+        else if(orig.first > dest.first){
+            orig.first--;
+        }
+        else{
+            orig.first++;
+        }
+
+        moveOrder.push_back(orig);
+    }
+
+    currState.containerMoveOrder.push_back(moveOrder);
+
 }
