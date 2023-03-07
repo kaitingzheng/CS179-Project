@@ -19,6 +19,9 @@ TEST(LOAD_TEST, LOAD_ONE_CONTAINER){
 
     EXPECT_EQ(state.ship[1][0].container.description, "Bird");
 
+    main->getNextMoveSequence();
+    main->getNextMoveSequence();
+
 }
 
 TEST(LOAD_TEST, LOAD_FIVE_CONTAINER){
@@ -120,4 +123,7 @@ TEST(LOAD_TEST, LOAD_92_CONTAINER){
 
     EXPECT_EQ(state.ship[1][1].container.description, "Bird");
     EXPECT_EQ(state.ship[1][11].container.description, "Bird");
+
+    main->getNextMoveSequence();
+    main->getNextMoveSequence();
 }

@@ -8,6 +8,7 @@
 #include "loadUnloadTest.cpp"
 #include "bufferTest.cpp"
 #include "moveOrderTest.cpp"
+#include "commentTest.cpp"
 
 int main(int argc, char **argv) {
   ::testing::InitGoogleTest(&argc, argv);

@@ -24,6 +24,7 @@ TEST(MOVEORDER_TEST, UNLOAD_ONE){
         EXPECT_EQ(state.containerMoveOrder[0][i], loc);
         loc.first++;
     }
+    main->getNextMoveSequence();
 
     loc.first = 8;
     loc.second = -1;
