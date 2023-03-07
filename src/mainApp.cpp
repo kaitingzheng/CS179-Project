@@ -21,7 +21,7 @@ mainApp :: mainApp() {
     pinkCell.second = -1;
 
     pinkCellBuffer.first = ROW_BUFFER;
-    pinkCellBuffer.second = -1;
+    pinkCellBuffer.second = COLUMN_BUFFER;
 }
 
 string mainApp::getShipName(){
@@ -75,6 +75,7 @@ void mainApp::parseManifest(){
         return;
     }
     string currLine;
+    int counter = 0;
     
     // parse manifest
     for(int i = 0; i < 8; i++){
@@ -136,6 +137,7 @@ void mainApp::parseManifest(){
                 }
 
                 initState.ship[i][j] = tempCell;
+                counter++;
             }
         }
     }
@@ -143,6 +145,8 @@ void mainApp::parseManifest(){
     for(int i = 0; i < COLUMN_SHIP; i++){
         calculateNumContainerAbove(i,initState);
     }
+
+    addComments("Manifest located at " + manifestName + " is opened, there are " + to_string(counter) + " containers on the ship");
 
 }
 
@@ -176,7 +180,6 @@ void mainApp::calculateNumContainerAbove(int column, State &currState){
         currentContainer--;
     }
 }
-
 
 void mainApp::updateNumContainerAbove(int column, int numChanged, State &currState){
 
@@ -221,7 +224,6 @@ Container mainApp::getContainerWithKey(string &key, State &currState){
     return unload;
 }
 
-
 pair<int,int> mainApp::findHighestColumnBetween(pair<int,int> &orig, pair<int,int> &dest, State &currState){
     int left = dest.second;
     int right = orig.second;
@@ -253,7 +255,6 @@ pair<int,int> mainApp::findHighestColumnBetween(pair<int,int> &orig, pair<int,in
     
     return highestColumnBetween;
 }
-
 
 // status 1 = moving to truck
 // status -1 = move to buffer
@@ -327,8 +328,7 @@ bool mainApp::moveContainer(int destColumn, Container &container, State &currSta
         if(currState.numOfcontainerInColumn[destColumn].first < ROW_SHIP){
             
             pair<int,int> highestColumnBetween = findHighestColumnBetween(dest,orig,currState);
-            timeToMove += calculateTime(orig,highestColumnBetween);
-            timeToMove += calculateTime(highestColumnBetween,dest);
+            timeToMove += calculateTime(orig,dest);
 
             if(currState.craneState == TRUCK){
                 currState.craneState = SHIP;
@@ -350,6 +350,8 @@ bool mainApp::moveContainer(int destColumn, Container &container, State &currSta
             // update state
             updateNumContainerAbove(orig.second, -1, currState);
             updateNumContainerAbove(dest.second, 1, currState);
+
+            timeToMove += 2;
 
             addMoveOrder(currState,orig,highestColumnBetween,dest);
         }
@@ -429,7 +431,7 @@ void mainApp::moveToBuffer(State &currState, Container container){
 
     if(currState.buffer.empty()){
         container.XY.first == 0;
-        container.XY.second == 0;
+        container.XY.second == COLUMN_BUFFER-1;
         currState.buffer.push(container);
     }
     else{
@@ -437,11 +439,11 @@ void mainApp::moveToBuffer(State &currState, Container container){
         
         if(topContainer.XY.first+1 >= ROW_BUFFER){
             container.XY.first == 0;
-            container.XY.second == topContainer.XY.second+1;
+            container.XY.second = topContainer.XY.second-1;
         }
         else{
             container.XY.first = topContainer.XY.first+1;
-            container.XY.second == topContainer.XY.second;
+            container.XY.second = topContainer.XY.second;
         }
         currState.buffer.push(container);
     }
@@ -472,6 +474,7 @@ State mainApp::unload_load(vector<string> &toBeUnloaded, vector<Container> &toBe
 
         if(currState.toBeLoaded.size() == 0 && currState.toBeUnloaded.size() == 0 && currState.buffer.empty()){
             // found best solution
+            solutionState = currState;
             return currState;
         }
 
@@ -640,6 +643,30 @@ void mainApp::addMoveOrder(State &currState, pair<int,int> orig, pair<int,int> m
 
     moveOrder.push_back(orig);
 
+    if(orig != pinkCell && dest != pinkCell){
+        while(orig != dest){
+                // dest is on the left
+                if(orig.second > dest.second){
+                    orig.second--;
+                }
+                // dest is on the right
+                else if(orig.second < dest.second){
+                    orig.second++;
+                }
+                // same column as dest but dest is below
+                else if(orig.first > dest.first){
+                    orig.first--;
+                }
+                else{
+                    orig.first++;
+                }
+
+                moveOrder.push_back(orig);
+        }
+        currState.containerMoveOrder.push_back(moveOrder);
+        return;
+    }
+
     while(orig != midPoint){
         // check if mid point is above orig, if above then we have to go up and over
         if(midPoint.first > orig.first){
@@ -680,4 +707,98 @@ void mainApp::addMoveOrder(State &currState, pair<int,int> orig, pair<int,int> m
 
     currState.containerMoveOrder.push_back(moveOrder);
 
+}
+
+vector<pair<int,int>> mainApp::getNextMoveSequence(){
+    vector<pair<int,int>> List;
+    if(currMoveSequence < solutionState.containerMoveOrder.size()){
+       List = solutionState.containerMoveOrder[currMoveSequence];
+        currMoveSequence++;
+        pair<int,int> orig = List[0];
+        pair<int,int> dest = List[List.size()-1];
+
+        if(orig == pinkCell){
+           for(int i = 0; i < initState.toBeLoaded.size(); i++){
+             if(solutionState.ship[dest.first][dest.second].container.description == initState.toBeLoaded[i].description){
+                // get container weight 
+             }
+           } 
+           string containerDescription = solutionState.ship[dest.first][dest.second].container.description;
+           addComments('"' + containerDescription + '"' + " is loaded");
+        }
+        if(dest == pinkCell){
+            string containerDescription = initState.ship[orig.first][orig.second].container.description;
+            addComments('"' + containerDescription + '"' + " is offloaded");
+        }
+    }
+    else{
+        addComments("Finished a cycle.");
+        createManifest();
+    }
+    return List;
+}
+
+int mainApp::getEstimatedTimeInMin(){
+    return solutionState.time;
+}
+
+void mainApp::addComments(string comment){
+    auto time = std::chrono::system_clock::now();
+    std::time_t end_time = std::chrono::system_clock::to_time_t(time);
+
+    std::ofstream Log_file ("Log.txt", std::ios::app);
+
+    Log_file << std::ctime(&end_time) << ":       " <<comment << endl;
+
+    Log_file.close();
+
+}
+
+void mainApp::createManifest(){
+
+    TCHAR path[MAX_PATH] = {0};
+
+    SHGetSpecialFolderPath(NULL, path, CSIDL_DESKTOPDIRECTORY, FALSE);
+
+    std::string pathtmp(&path[0], &path[255]);
+    int counter = 0;
+    for(int i = 0; i< pathtmp.size(); i++){
+        if(isalpha(pathtmp[i])){
+            counter = i;
+        }
+    }
+    pathtmp.resize(counter+1);
+
+    string manifestName = pathtmp + "/" + currShipName + "OUTBOUND.txt";
+
+    for(int i = 0; i < manifestName.size(); i++){
+        if(manifestName[i] == '\\'){
+            manifestName[i] = '/';
+        }
+    }
+    
+    std::ofstream manifest (manifestName);
+
+    for(int i = 0; i < ROW_SHIP; i++){
+        for(int j = 0; j < COLUMN_SHIP; j++){
+            manifest << "[" << std::setfill('0') << std::setw(2) << i+1 << "," << std::setfill('0') << std::setw(2) << j+1 << "], ";
+
+
+            if(solutionState.ship[i][j].status == NOTEXIST){
+                manifest << "{00000}, ";
+                manifest << "NAN" << endl;
+            }
+            else if (solutionState.ship[i][j].status == UNUSED){
+                manifest << "{00000}, ";
+                manifest << "UNUSED" << endl;
+            }
+            else{
+                manifest << "{" << std::setfill('0') << std::setw(5) << solutionState.ship[i][j].container.weight << "}, ";
+                manifest << solutionState.ship[i][j].container.description << endl;
+            }
+
+        }
+    }
+
+    addComments("Manifest " + manifestName + " was written to desktop, and a reminder pop-up is displayed");
 }
