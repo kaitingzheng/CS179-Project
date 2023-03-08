@@ -9,6 +9,10 @@
 #include <unordered_map>
 #include <queue>
 #include <stack>
+#include <chrono>
+#include <ctime> 
+#include <iomanip>
+#include <shlobj.h>
 
 using namespace std;
 
@@ -63,7 +67,7 @@ class Compare{
 
 class mainApp{
     private:
-        State initState;
+        State solutionState;
         string currShipName;
         string currOpName;
         string manifestName;
@@ -98,6 +102,7 @@ class mainApp{
         void moveToBuffer(State&, Container);
         int calculateEmptyColumn(State&, int);
         void addMoveOrder(State&, pair<int,int>,pair<int,int>,pair<int,int>);
+        void createManifest();
 
         int ROW_SHIP = 8;
         int COLUMN_SHIP = 12;
@@ -110,16 +115,19 @@ class mainApp{
 
         int NOT_EXIST = -1;
 
+        int currMoveSequence = 0;
+
     public:
+        State initState;
         mainApp();
         void newShip(string manifest);
         string getShipName();
         string getOpName();
-        int getNextMove();
+        vector<pair<int,int>> getNextMoveSequence();
         int getEstimatedTimeInMin();
         State unload_load(vector<string>&, vector<Container>&);
         void balance();
-        void opComments(string&);
+        void addComments(string);
         
 
         Container getContainer(int, int);

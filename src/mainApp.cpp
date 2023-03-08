@@ -59,7 +59,7 @@ void mainApp::newShip(string manifest){
 
     int index = 0;
     for(unsigned int i = 0; i < manifest.size(); i++){
-        if(manifest[i] == '/'){
+        if(manifest[i] == '/' || manifest[i] == '\\'){
             index = i;
         }
     }
@@ -121,11 +121,11 @@ void mainApp::parseManifest(){
                 container.XY.first = i;
                 container.XY.second = j;
                 
-                tempCell.container = container;
-
                 // add to hash map
                 string key = weight+description;
                 container.key = key;
+                tempCell.container = container;
+
                 initState.hashMapForContainer[key].push_back(container);
 
                 // update containerInColumn
@@ -453,6 +453,8 @@ void mainApp::moveToBuffer(State &currState, Container container){
 }
 
 State mainApp::unload_load(vector<string> &toBeUnloaded, vector<Container> &toBeLoaded){
+
+    if(toBeLoaded.empty() && toBeUnloaded.empty()) return initState;
 
     // convert toBeUnloaded in to vector of containers
     for(int i = 0; i < toBeUnloaded.size(); i++){
