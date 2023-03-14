@@ -66,3 +66,18 @@ TEST(UNLOAD_TEST, UNLOAD_ONE_CONTAINER_W_MULT_CONTAINER_ABOVE){
     EXPECT_EQ(state.ship[1][4].status, UNUSED);
     EXPECT_EQ(state.ship[1][3].status, USED);
 }
+
+TEST(UNLOAD_TEST, UNLOAD_ONE_DUPLICATE){
+    mainApp *main = new mainApp();
+    main->newShip("../sample_manifest/ShipCase7.txt");
+
+    vector<Container> load;
+    vector<string> unload;
+
+    string container = "00099Cat";
+    unload.push_back(container);
+
+    State state = main->unload_load(unload,load);
+
+    EXPECT_EQ(state.ship[4][11].container.description, "Turtle");
+}

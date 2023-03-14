@@ -200,9 +200,23 @@ void mainApp::updateNumContainerAbove(int column, int numChanged, State &currSta
     // update container in toBeUnloaded
     for(int i = 0; i < currState.toBeUnloaded.size(); i++){
         int row = currState.toBeUnloaded[i].XY.first;
-        int column = currState.toBeUnloaded[i].XY.second;
+        int column2 = currState.toBeUnloaded[i].XY.second;
         
-        currState.toBeUnloaded[i].numContainerAbove = currState.ship[row][column].container.numContainerAbove;
+        currState.toBeUnloaded[i].numContainerAbove = currState.ship[row][column2].container.numContainerAbove;
+    }
+
+    for(int i = 0; i <  currState.numOfcontainerInColumn[column].first; i++){
+        string key = currState.ship[i][column].container.key;
+        int size_of_vec_container = currState.hashMapForContainer[key].size();
+        
+        for(int j = 0; j < size_of_vec_container; j++){
+            if(currState.hashMapForContainer[key][j].XY == currState.ship[i][column].container.XY){
+                int row = currState.ship[i][column].container.XY.first;
+                int column2 = currState.ship[i][column].container.XY.second;
+                
+                currState.hashMapForContainer[key][j].numContainerAbove = currState.ship[row][column2].container.numContainerAbove;
+            }
+        }
     }
 
 }
@@ -229,8 +243,8 @@ pair<int,int> mainApp::findHighestColumnBetween(pair<int,int> &orig, pair<int,in
     int right = orig.second;
     pair<int,int> highestColumnBetween;
     if(left > right){
-        left = orig.first;
-        right = dest.first;
+        left = orig.second;
+        right = dest.second;
     }
 
     if(abs(orig.second - dest.second) <=1 ){
@@ -239,19 +253,19 @@ pair<int,int> mainApp::findHighestColumnBetween(pair<int,int> &orig, pair<int,in
         return highestColumnBetween;
     }
 
-    int highestColumn = left;
+    int highestColumn = left+1;
 
-    for(int i = left+1; i < right; i++){
+    for(int i = left+1; i <= right; i++){
         if(left == -1){
             i++;
         }
-        if(currState.numOfcontainerInColumn[highestColumn].first-1 < currState.numOfcontainerInColumn[i].first){
+        if(currState.numOfcontainerInColumn[highestColumn].first < currState.numOfcontainerInColumn[i].first){
             highestColumn = i;
         }
     }
     
     highestColumnBetween.second = highestColumn;
-    highestColumnBetween.first = currState.numOfcontainerInColumn[highestColumn].first-1;
+    highestColumnBetween.first = currState.numOfcontainerInColumn[highestColumn].first;
     
     return highestColumnBetween;
 }
@@ -420,7 +434,7 @@ bool mainApp::moveContainer(int destColumn, Container &container, State &currSta
         moveContainer(emptyColumn,container,currState,2);
     }
     currState.time += timeToMove + timeToMoveCrane;
-    currState.cost = currState.time;
+    currState.cost = currState.time + currState.toBeLoaded.size() + currState.toBeUnloaded.size() + currState.buffer.size();
 
 
 
@@ -613,6 +627,10 @@ int mainApp::calculateEmptyColumn(State& currState, int column){
         arr[currState.toBeUnloaded[i].XY.second] = true;
     }
 
+    pair<int,int> orig;
+    orig.second = column;
+    orig.first = currState.numOfcontainerInColumn[column].first;
+    
     for(int i = 0; i < COLUMN_SHIP; i++){
         if(arr[i] == false && currState.numOfcontainerInColumn[i].first < ROW_SHIP && i != column){
             if(column == -1){
@@ -621,8 +639,20 @@ int mainApp::calculateEmptyColumn(State& currState, int column){
             else if(index == -1){
                 index = i;
             }
-            else if(abs(i - column) < abs(index - column)){
-                index = i;
+            // else if(abs(i - column) < abs(index - column)){
+            //     index = i;
+            // }
+            else{
+                pair<int,int> best;
+                best.first = currState.numOfcontainerInColumn[index].first;
+                best.second = index;
+
+                pair<int,int> c;
+                c.first = currState.numOfcontainerInColumn[i].first;
+                c.second = i;
+                if(calculateTime(best,orig) > calculateTime(orig,c)){
+                    index = i;
+                }
             }
         }
     }
@@ -681,6 +711,9 @@ void mainApp::addMoveOrder(State &currState, pair<int,int> orig, pair<int,int> m
         // midpoing is on the right
         else if(orig.second < midPoint.second){
             orig.second++;
+        }
+        else if(midPoint.first < orig.first){
+            orig.first--;
         }
         moveOrder.push_back(orig);
     }
@@ -803,4 +836,8 @@ void mainApp::createManifest(){
     }
 
     addComments("Manifest " + manifestName + " was written to desktop, and a reminder pop-up is displayed");
+}
+
+int mainApp::numOfMovesRemain(){
+    return solutionState.containerMoveOrder.size()-currMoveSequence;
 }

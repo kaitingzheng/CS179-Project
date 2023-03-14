@@ -128,9 +128,11 @@ class mainApp{
         State unload_load(vector<string>&, vector<Container>&);
         void balance();
         void addComments(string);
+        int numOfMovesRemain();
         
 
         Container getContainer(int, int);
+        
 
 
 
