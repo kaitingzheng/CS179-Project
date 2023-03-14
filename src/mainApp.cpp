@@ -510,10 +510,12 @@ State mainApp::unload_load(vector<string> &toBeUnloaded, vector<Container> &toBe
             // crane on ship then unload
             if(currState.craneState == SHIP){
                 unload_one(currState);
+                load_one(currState);
             }
             // crane on truck then load
             else if(currState.craneState == TRUCK){
                 load_one(currState);
+                unload_one(currState);
             }
             
         }
