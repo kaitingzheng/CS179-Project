@@ -697,7 +697,8 @@ State mainApp::balanceSearch(){ //balance
                 std::cout << "goal reached" << std::endl;
                 std::cout << calculateBalance(currState) << std::endl;
                 std::cout << "goal cost: " << currState.cost << std::endl;
-                return currState;
+		solutionState = currState;
+                return solutionState;
             }
 
             // balance
