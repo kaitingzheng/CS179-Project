@@ -21,6 +21,8 @@ TEST(LOAD_UNLOAD_TEST, UNLOAD_LOAD_ONE_CONTAINER){
 
     EXPECT_EQ(state.ship[0][1].status, UNUSED);
     EXPECT_EQ(state.ship[1][0].container.description, "Bird");
+
+    delete main;
 }
 
 
@@ -50,4 +52,8 @@ TEST(LOAD_UNLOAD_TEST, UNLOAD_ONE_LOAD_TWO_CONTAINER){
     EXPECT_EQ(state.ship[0][1].status, UNUSED);
     EXPECT_EQ(state.ship[2][0].status, USED);
     EXPECT_EQ(state.ship[3][0].status, USED);
+
+    delete main;
+
+    
 }

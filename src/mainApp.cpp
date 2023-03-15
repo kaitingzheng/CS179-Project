@@ -11,6 +11,9 @@ struct greater_than_key
 {
     inline bool operator() (const Container &struct1, const Container &struct2)
     {
+        if(struct1.numContainerAbove == struct2.numContainerAbove){
+            return struct1.XY.second < struct2.XY.second;
+        }
         return (struct1.numContainerAbove > struct2.numContainerAbove);
     }
 };
@@ -434,7 +437,7 @@ bool mainApp::moveContainer(int destColumn, Container &container, State &currSta
         moveContainer(emptyColumn,container,currState,2);
     }
     currState.time += timeToMove + timeToMoveCrane;
-    currState.cost = currState.time + currState.toBeLoaded.size() + currState.toBeUnloaded.size() + currState.buffer.size();
+    currState.cost = currState.time + (currState.toBeLoaded.size() + currState.toBeUnloaded.size() + currState.buffer.size())*10;
 
 
 
@@ -631,7 +634,7 @@ int mainApp::calculateEmptyColumn(State& currState, int column){
 
     pair<int,int> orig;
     orig.second = column;
-    orig.first = currState.numOfcontainerInColumn[column].first;
+    orig.first = currState.numOfcontainerInColumn[column].first-1;
     
     for(int i = 0; i < COLUMN_SHIP; i++){
         if(arr[i] == false && currState.numOfcontainerInColumn[i].first < ROW_SHIP && i != column){

@@ -25,4 +25,5 @@ TEST(BUFFER_TEST, MOVE_ONE_CONTAINER_TO_BUFFER_AND_BACK){
     // }
 
     EXPECT_EQ(state.ship[6][0].container.description, "Turtle");
+    delete main;
 }
