@@ -88,7 +88,6 @@ class mainApp{
         
         
         int calculateTime(pair<int,int>&, pair<int,int>&);
-        void calculateNumContainerAbove(int, State&);
         void updateNumContainerAbove(int, int, State&);
         
         Container getContainerWithKey(string&,State&);
