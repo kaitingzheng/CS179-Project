@@ -102,6 +102,7 @@ class mainApp{
         int calculateEmptyColumn(State&, int);
         void addMoveOrder(State&, pair<int,int>,pair<int,int>,pair<int,int>);
         void createManifest();
+        void removeContainer(Container& container, State&);
 
         int ROW_SHIP = 8;
         int COLUMN_SHIP = 12;

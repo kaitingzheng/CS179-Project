@@ -215,9 +215,6 @@ Container mainApp::getContainerWithKey(string &key, State &currState){
     sort(temp.begin(), temp.end(), greater_than_key());
     Container unload = temp[temp.size()-1];
     
-    int size = temp.size();
-    currState.hashMapForContainer[key].resize(size-1);
-    
     return unload;
 }
 
@@ -564,8 +561,7 @@ void mainApp::unload_one(State &currState){
         newState = currState;
         moveContainer(0,currContainer,newState,1);
         newState.toBeUnloaded.pop_back();
-
-
+        removeContainer(currContainer,newState);
         bestState.emplace(newState);
 
     }
@@ -829,4 +825,15 @@ void mainApp::createManifest(){
 
 int mainApp::numOfMovesRemain(){
     return solutionState.containerMoveOrder.size()-currMoveSequence;
+}
+
+void mainApp::removeContainer(Container& container, State& currState){
+    vector<Container> containers;
+    for(int i = 0; i < currState.hashMapForContainer[container.key].size(); i++){
+        if(currState.hashMapForContainer[container.key][i].XY != container.XY){
+            containers.push_back(currState.hashMapForContainer[container.key][i]);
+        }
+    }
+
+    currState.hashMapForContainer[container.key] = containers;
 }
