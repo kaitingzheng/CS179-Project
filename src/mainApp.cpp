@@ -407,7 +407,7 @@ bool mainApp::moveContainer(int destColumn, Container &container, State &currSta
            timeToMoveCrane+=TIME_FROM_SHIP_TO_BUFFER;
         }
         timeToMove += calculateTime(pinkCellBuffer, container.XY);
-        addMoveOrder(currState,currState.buffer.top().XY,pinkCellBuffer,pinkCellBuffer);
+        addMoveOrder(currState,container.XY,pinkCellBuffer,pinkCellBuffer);
 
         int emptyColumn = calculateEmptyColumn(currState, -1);
         moveContainer(emptyColumn,container,currState,2);
@@ -423,15 +423,15 @@ bool mainApp::moveContainer(int destColumn, Container &container, State &currSta
 void mainApp::moveToBuffer(State &currState, Container container){
 
     if(currState.buffer.empty()){
-        container.XY.first == 0;
-        container.XY.second == COLUMN_BUFFER-1;
+        container.XY.first = 0;
+        container.XY.second = COLUMN_BUFFER-1;
         currState.buffer.push(container);
     }
     else{
         Container topContainer = currState.buffer.top();
         
         if(topContainer.XY.first+1 >= ROW_BUFFER){
-            container.XY.first == 0;
+            container.XY.first = 0;
             container.XY.second = topContainer.XY.second-1;
         }
         else{

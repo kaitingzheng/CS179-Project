@@ -22,7 +22,7 @@ enum CraneState {SHIP,TRUCK,BUFFER};
 
 
 struct Container{
-    int weight;
+    int weight = -1;
     string description;
     pair<int,int> XY;
     string key;
