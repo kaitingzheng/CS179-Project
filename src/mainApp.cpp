@@ -14,7 +14,8 @@ struct greater_than_key
     inline bool operator() (const Container &struct1, const Container &struct2)
     {
         if(struct1.numContainerAbove == struct2.numContainerAbove){
-            return struct1.XY.second > struct2.XY.second;
+            return (abs(struct1.XY.first - 8) + abs(struct1.XY.second +1)) > (abs(struct2.XY.first - 8) + abs(struct2.XY.second +1));
+            //return struct1.XY.second > struct2.XY.second;
         }
         return (struct1.numContainerAbove > struct2.numContainerAbove);
     }
@@ -213,6 +214,9 @@ Container mainApp::getContainerWithKey(string &key, State &currState){
     
     sort(temp.begin(), temp.end(), greater_than_key());
     Container unload = temp[temp.size()-1];
+    
+    int size = temp.size();
+    currState.hashMapForContainer[key].resize(size-1);
     
     return unload;
 }
@@ -516,8 +520,9 @@ State mainApp::unload_load(vector<string> &toBeUnloaded, vector<Container> &toBe
 void mainApp::unload_one(State &currState){
     sort(currState.toBeUnloaded.begin(),currState.toBeUnloaded.end(),greater_than_key());
 
-    Container currContainer = currState.toBeUnloaded.at(currState.toBeUnloaded.size()-1);
-
+    //Container currContainer = currState.toBeUnloaded.at(currState.toBeUnloaded.size()-1);
+    Container currContainer = getContainerWithKey(currState.toBeUnloaded.at(currState.toBeUnloaded.size()-1).key, currState);
+    
     if(currContainer.numContainerAbove > 0){
         int row = currState.numOfcontainerInColumn[currContainer.XY.second].first-1;
         int column = currContainer.XY.second;
