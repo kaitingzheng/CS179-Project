@@ -520,8 +520,11 @@ State mainApp::unload_load(vector<string> &toBeUnloaded, vector<Container> &toBe
 void mainApp::unload_one(State &currState){
     sort(currState.toBeUnloaded.begin(),currState.toBeUnloaded.end(),greater_than_key());
 
-    //Container currContainer = currState.toBeUnloaded.at(currState.toBeUnloaded.size()-1);
-    Container currContainer = getContainerWithKey(currState.toBeUnloaded.at(currState.toBeUnloaded.size()-1).key, currState);
+    Container currContainer = currState.toBeUnloaded.at(currState.toBeUnloaded.size()-1);
+    if(!currState.hashMapForContainer[currContainer.key].empty()){
+        currContainer = getContainerWithKey(currState.toBeUnloaded.at(currState.toBeUnloaded.size()-1).key, currState);
+    }
+    //Container currContainer = getContainerWithKey(currState.toBeUnloaded.at(currState.toBeUnloaded.size()-1).key, currState);
     
     if(currContainer.numContainerAbove > 0){
         int row = currState.numOfcontainerInColumn[currContainer.XY.second].first-1;
