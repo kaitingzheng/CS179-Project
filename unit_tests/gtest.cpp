@@ -4,9 +4,9 @@
 // #include "parseManifestTest.cpp"
 // #include "calculateNumContainerTest.cpp"
 // #include "loadTest.cpp"
-// #include "unloadTest.cpp"
-#include "loadUnloadTest.cpp"
-#include "bufferTest.cpp"
+#include "unloadTest.cpp"
+// #include "loadUnloadTest.cpp"
+// #include "bufferTest.cpp"
 // #include "moveOrderTest.cpp"
 // #include "commentTest.cpp"
 

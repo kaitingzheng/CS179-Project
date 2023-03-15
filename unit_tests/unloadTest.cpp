@@ -49,6 +49,7 @@ TEST(UNLOAD_TEST, UNLOAD_ONE_CONTAINER_W_CONTAINER_ABOVE){
 
     EXPECT_EQ(state.ship[0][1].status, UNUSED);
     EXPECT_EQ(state.ship[1][0].status, USED);
+    
 }
 
 TEST(UNLOAD_TEST, UNLOAD_ONE_CONTAINER_W_MULT_CONTAINER_ABOVE){
@@ -80,5 +81,14 @@ TEST(UNLOAD_TEST, UNLOAD_ONE_DUPLICATE){
     State state = main->unload_load(unload,load);
 
     EXPECT_EQ(state.ship[4][11].container.description, "Turtle");
+
+    //     for(int i = 0; i < 8; i++){
+    //     for(int j = 0; j < 12; j++){
+    //         if(state.ship[i][j].status == USED){
+    //             cout << "-------"<< endl;
+    //             cout << i << " " << j << " " << state.ship[i][j].container.description << endl;
+    //         }
+    //     }
+    // }
 }
 

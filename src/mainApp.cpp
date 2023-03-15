@@ -12,7 +12,7 @@ struct greater_than_key
     inline bool operator() (const Container &struct1, const Container &struct2)
     {
         if(struct1.numContainerAbove == struct2.numContainerAbove){
-            return struct1.XY.second < struct2.XY.second;
+            return struct1.XY.second > struct2.XY.second;
         }
         return (struct1.numContainerAbove > struct2.numContainerAbove);
     }
@@ -182,6 +182,28 @@ void mainApp::calculateNumContainerAbove(int column, State &currState){
         currentNumOfContainer--;
         currentContainer--;
     }
+
+        // update container in toBeUnloaded
+    for(int i = 0; i < currState.toBeUnloaded.size(); i++){
+        int row = currState.toBeUnloaded[i].XY.first;
+        int column2 = currState.toBeUnloaded[i].XY.second;
+        
+        currState.toBeUnloaded[i].numContainerAbove = currState.ship[row][column2].container.numContainerAbove;
+    }
+
+    for(int i = 0; i <  currState.numOfcontainerInColumn[column].first; i++){
+        string key = currState.ship[i][column].container.key;
+        int size_of_vec_container = currState.hashMapForContainer[key].size();
+        
+        for(int j = 0; j < size_of_vec_container; j++){
+            if(currState.hashMapForContainer[key][j].XY == currState.ship[i][column].container.XY){
+                int row = currState.ship[i][column].container.XY.first;
+                int column2 = currState.ship[i][column].container.XY.second;
+                
+                currState.hashMapForContainer[key][j].numContainerAbove = currState.ship[row][column2].container.numContainerAbove;
+            }
+        }
+    }
 }
 
 void mainApp::updateNumContainerAbove(int column, int numChanged, State &currState){
@@ -233,9 +255,9 @@ Container mainApp::getContainerWithKey(string &key, State &currState){
     Container unload = temp[temp.size()-1];
     
     // update numOfContainerAbove
-    pair<int,int> a = unload.XY;
-    int numAbove = currState.ship[a.first][a.second].container.numContainerAbove;
-    unload.numContainerAbove = numAbove;
+    // pair<int,int> a = unload.XY;
+    // int numAbove = currState.ship[a.first][a.second].container.numContainerAbove;
+    // unload.numContainerAbove = numAbove;
 
 
     return unload;
@@ -541,7 +563,7 @@ void mainApp::unload_one(State &currState){
     sort(currState.toBeUnloaded.begin(),currState.toBeUnloaded.end(),greater_than_key());
 
     Container currContainer = currState.toBeUnloaded.at(currState.toBeUnloaded.size()-1);
-
+    
     if(currContainer.numContainerAbove > 0){
         
         int row = currState.numOfcontainerInColumn[currContainer.XY.second].first-1;
@@ -568,6 +590,7 @@ void mainApp::unload_one(State &currState){
                     break;
                 }
                 else{
+                    cout << "move within ship" << endl;
                     moveContainer(i,topContainer,newState,0);
                     bestState.emplace(newState);
                 }
