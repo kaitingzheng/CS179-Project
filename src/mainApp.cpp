@@ -254,12 +254,6 @@ Container mainApp::getContainerWithKey(string &key, State &currState){
     sort(temp.begin(), temp.end(), greater_than_key());
     Container unload = temp[temp.size()-1];
     
-    // update numOfContainerAbove
-    // pair<int,int> a = unload.XY;
-    // int numAbove = currState.ship[a.first][a.second].container.numContainerAbove;
-    // unload.numContainerAbove = numAbove;
-
-
     return unload;
 }
 
@@ -563,9 +557,8 @@ void mainApp::unload_one(State &currState){
     sort(currState.toBeUnloaded.begin(),currState.toBeUnloaded.end(),greater_than_key());
 
     Container currContainer = currState.toBeUnloaded.at(currState.toBeUnloaded.size()-1);
-    
+
     if(currContainer.numContainerAbove > 0){
-        
         int row = currState.numOfcontainerInColumn[currContainer.XY.second].first-1;
         int column = currContainer.XY.second;
         Container topContainer = currState.ship[row][column].container;

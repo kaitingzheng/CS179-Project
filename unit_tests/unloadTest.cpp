@@ -92,3 +92,27 @@ TEST(UNLOAD_TEST, UNLOAD_ONE_DUPLICATE){
     // }
 }
 
+TEST(UNLOAD_TEST, UNLOAD_MULT_DUPLICATE){
+    mainApp *main = new mainApp();
+    main->newShip("../sample_manifest/ShipCase7.txt");
+
+    vector<Container> load;
+    vector<string> unload;
+
+    string container = "00000Turtle";
+    unload.push_back(container);
+
+    State state = main->unload_load(unload,load);
+
+    //EXPECT_EQ(state.ship[4][11].container.description, "Turtle");
+
+    //     for(int i = 0; i < 8; i++){
+    //     for(int j = 0; j < 12; j++){
+    //         if(state.ship[i][j].status == USED){
+    //             cout << "-------"<< endl;
+    //             cout << i << " " << j << " " << state.ship[i][j].container.description << endl;
+    //         }
+    //     }
+    // }
+}
+
