@@ -146,7 +146,7 @@ void mainApp::parseManifest(){
     }
 
     for(int i = 0; i < COLUMN_SHIP; i++){
-        calculateNumContainerAbove(i,initState);
+        updateNumContainerAbove(i,0,initState);
     }
 
     addComments("Manifest located at " + manifestName + " is opened, there are " + to_string(counter) + " containers on the ship");
@@ -163,47 +163,6 @@ Container mainApp::getContainer(int x, int y){
         return initState.ship[x][y].container;
     }
     return noContainer;
-}
-
-void mainApp::calculateNumContainerAbove(int column, State &currState){
-    
-    int currentNumOfContainer = currState.numOfcontainerInColumn[column].second;
-    
-    int currentContainer = currState.numOfcontainerInColumn[column].first-1;
-    
-    if(currentNumOfContainer == 0){
-        return;
-    }
-    
-    int numAbove = 0;
-    while(currentNumOfContainer > 0){
-        currState.ship[currentContainer][column].container.numContainerAbove = numAbove;
-        numAbove++;
-        currentNumOfContainer--;
-        currentContainer--;
-    }
-
-        // update container in toBeUnloaded
-    for(int i = 0; i < currState.toBeUnloaded.size(); i++){
-        int row = currState.toBeUnloaded[i].XY.first;
-        int column2 = currState.toBeUnloaded[i].XY.second;
-        
-        currState.toBeUnloaded[i].numContainerAbove = currState.ship[row][column2].container.numContainerAbove;
-    }
-
-    for(int i = 0; i <  currState.numOfcontainerInColumn[column].first; i++){
-        string key = currState.ship[i][column].container.key;
-        int size_of_vec_container = currState.hashMapForContainer[key].size();
-        
-        for(int j = 0; j < size_of_vec_container; j++){
-            if(currState.hashMapForContainer[key][j].XY == currState.ship[i][column].container.XY){
-                int row = currState.ship[i][column].container.XY.first;
-                int column2 = currState.ship[i][column].container.XY.second;
-                
-                currState.hashMapForContainer[key][j].numContainerAbove = currState.ship[row][column2].container.numContainerAbove;
-            }
-        }
-    }
 }
 
 void mainApp::updateNumContainerAbove(int column, int numChanged, State &currState){
@@ -245,7 +204,6 @@ void mainApp::updateNumContainerAbove(int column, int numChanged, State &currSta
     }
 
 }
-
 
 // return container with key that has the least container above it
 Container mainApp::getContainerWithKey(string &key, State &currState){
