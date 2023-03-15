@@ -703,7 +703,9 @@ State mainApp::balanceSearch(){ //balance
 
             // balance
             else if((curBal < 0.9) || (curBal > 1.1)){ 
-                toBeBalanced = balanceList(currState);
+                toBeBalanced = 
+			
+			(currState);
                 
                 while (!toBeBalanced.empty()) {
                     currCont = toBeBalanced.top();
@@ -739,7 +741,7 @@ stack<Container> mainApp::balanceList(State &currState) {
     if ((rightSideWeight/leftSideWeight) < 0.9) { //less weight on right side then left
         //std::cout << "less weight on right than left" << std::endl;
         for (int i = 7; i > -1; i--) {
-            for (int j = 6; j > -1; j--) {
+            for (int j = 5; j > -1; j--) {
                 if (currState.ship[i][j].status == USED) {
                     float dif = abs((rightSideWeight + currState.ship[i][j].container.weight) - (leftSideWeight - currState.ship[i][j].container.weight));
                     if ( dif < differenceWeight ) {
