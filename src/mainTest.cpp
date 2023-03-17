@@ -4,14 +4,16 @@
 
 int main() {
     mainApp *main = new mainApp();
-    main->newShip("../sample_manifest/ShipCase4.txt");
+    main->newShip("../sample_manifest/ShipCase9.txt");
 	
     State state = main->balanceSearch();
 
+	vector<pair<int,int>> List;
     for (int i = 0; i < state.containerMoveOrder.size(); i++) {
 	    std::cout << "New container to move" << std::endl;
-	    for (int j = 0; j <state.containerMoveOrder[i].size(); j++) {
-		    std::cout << "Move Action: " << state.containerMoveOrder[i][j].first << ", " << state.containerMoveOrder[i][j].second << std::endl;
+		List = main->getNextMoveSequence();
+	    for (int j = 0; j < List.size(); j++) {
+		    std::cout << "Move Action: " << /*state.containerMoveOrder[i][j].first*/ List[j].first << ", " << /*state.containerMoveOrder[i][j].second*/ List[j].second << std::endl;
 	    }
     }
 
@@ -40,7 +42,7 @@ int main() {
 				    cout << "---" << " | ";
 			    }
 			    else {
-			    	cout << "UNUSED" << " | ";
+			    	cout << "UN" << " | ";
 			    }
 		    }
 		    cout << endl;
@@ -71,11 +73,12 @@ int main() {
 				    cout << "---" << " | ";
 			    }
 			    else {
-			    	cout << "UNUSED" << " | ";
+			    	cout << "UN" << " | ";
 			    }
 		    }
 		    cout << endl;
 	}
 	cout << "Solution cost: " <<  state.cost << endl;
+	delete main;
     return 0;
 }

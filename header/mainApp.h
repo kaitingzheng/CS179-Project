@@ -43,6 +43,12 @@ struct State{
     vector<Container> toBeLoaded;
     int time = 0;
     int cost = 0;
+    int depth = 0;
+    int balanceDifference = 99999;
+    //int selectedContWeight = 0;
+    //int misplacedTiles = 0;
+    int estRemainingCost = 9999999;
+    //float balance = 0;
     pair<int,int> craneLocation;
     
 
@@ -60,7 +66,16 @@ struct State{
 class Compare{
     public:
         bool operator()(State &a, State &b){
-            return a.cost > b.cost;
+             return a.cost > b.cost;
+        }
+};
+
+class balanceCompare{
+    public:
+        bool operator()(State &a, State &b){
+           
+            return (a.cost + a.estRemainingCost > b.cost + b.estRemainingCost) || (a.balanceDifference > b.balanceDifference); //best heuristic for now, somehow????
+
         }
 };
 
@@ -75,6 +90,8 @@ class mainApp{
         int estimateTimeInMin;
 
         priority_queue <State, vector<State>, Compare> bestState;
+        priority_queue <State, vector<State>, balanceCompare> bestStateBalance;
+        vector<State> duplicateNodes;
 
         Container noContainer;
 
@@ -111,6 +128,9 @@ class mainApp{
         void balance_one(State&, Container);
         bool moveContainerBalance(int column, Container&, State&, int);
         void moveToBufferBalance(State&, Container);
+        bool siftCheck();
+        State siftProcedure();
+        int calcMisplaced(State&);
 
         int ROW_SHIP = 8;
         int COLUMN_SHIP = 12;
