@@ -74,8 +74,8 @@ class Compare{
 class balanceCompare{
     public:
         bool operator()(State &a, State &b){
-           
-            return (a.cost + a.estRemainingCost > b.cost + b.estRemainingCost) || (a.balanceDifference > b.balanceDifference); //best heuristic for now, somehow????
+           return a.cost > b.cost;
+            //return (a.cost + a.estRemainingCost > b.cost + b.estRemainingCost) || (a.balanceDifference > b.balanceDifference); //best heuristic for now, somehow????
 
         }
 };
