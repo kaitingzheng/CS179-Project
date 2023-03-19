@@ -6161,3 +6161,121 @@ Wed Mar 15 15:30:02 2023
 :       Manifest located at ../sample_manifest/ShipCase1.txt is opened, there are 2 containers on the ship
 Wed Mar 15 15:30:02 2023
 :       TEST
+Sat Mar 18 20:20:27 2023
+:       Manifest located at ../sample_manifest/ShipCase1.txt is opened, there are 2 containers on the ship
+Sat Mar 18 20:20:27 2023
+:       Manifest located at ../sample_manifest/ShipCase1.txt is opened, there are 2 containers on the ship
+Sat Mar 18 20:20:27 2023
+:       Manifest located at ../sample_manifest/ShipCase1.txt is opened, there are 2 containers on the ship
+Sat Mar 18 20:20:27 2023
+:       Manifest located at ../sample_manifest/ShipCase4.txt is opened, there are 7 containers on the ship
+Sat Mar 18 20:20:27 2023
+:       Manifest located at ../sample_manifest/ShipCase1.txt is opened, there are 2 containers on the ship
+Sat Mar 18 20:20:27 2023
+:       Manifest located at ../sample_manifest/ShipCase1.txt is opened, there are 2 containers on the ship
+Sat Mar 18 20:20:27 2023
+:       Manifest located at ../sample_manifest/ShipCase6.txt is opened, there are 3 containers on the ship
+Sat Mar 18 20:20:27 2023
+:       Manifest located at ../sample_manifest/ShipCase6.txt is opened, there are 3 containers on the ship
+Sat Mar 18 20:20:27 2023
+:       Manifest located at ../sample_manifest/ShipCase4.txt is opened, there are 7 containers on the ship
+Sat Mar 18 20:20:27 2023
+:       Manifest located at ../sample_manifest/ShipCase1.txt is opened, there are 2 containers on the ship
+Sat Mar 18 20:20:27 2023
+:       "Bird" is loaded
+Sat Mar 18 20:20:27 2023
+:       Finished a cycle.
+Sat Mar 18 20:20:27 2023
+:       Manifest C:/Users/xinzh/Desktop/ShipCase1OUTBOUND.txt was written to desktop, and a reminder pop-up is displayed
+Sat Mar 18 20:20:27 2023
+:       Manifest located at ../sample_manifest/ShipCase1.txt is opened, there are 2 containers on the ship
+Sat Mar 18 20:20:27 2023
+:       Manifest located at ../sample_manifest/ShipCase1.txt is opened, there are 2 containers on the ship
+Sat Mar 18 20:20:27 2023
+:       Manifest located at ../sample_manifest/ShipCase1.txt is opened, there are 2 containers on the ship
+Sat Mar 18 20:20:27 2023
+:       "Bird" is loaded
+Sat Mar 18 20:20:27 2023
+:       "Bird" is loaded
+Sat Mar 18 20:20:27 2023
+:       Manifest located at ../sample_manifest/ShipCase1.txt is opened, there are 2 containers on the ship
+Sat Mar 18 20:20:27 2023
+:       Manifest located at ../sample_manifest/ShipCase1.txt is opened, there are 2 containers on the ship
+Sat Mar 18 20:20:27 2023
+:       Manifest located at ../sample_manifest/ShipCase6.txt is opened, there are 3 containers on the ship
+Sat Mar 18 20:20:27 2023
+:       Manifest located at ../sample_manifest/ShipCase4.txt is opened, there are 7 containers on the ship
+Sat Mar 18 20:20:27 2023
+:       Manifest located at ../sample_manifest/ShipCase1.txt is opened, there are 2 containers on the ship
+Sat Mar 18 20:20:27 2023
+:       Manifest located at ../sample_manifest/ShipCase3.txt is opened, there are 6 containers on the ship
+Sat Mar 18 20:20:27 2023
+:       Manifest located at ../sample_manifest/ShipCase1.txt is opened, there are 2 containers on the ship
+Sat Mar 18 20:20:27 2023
+:       "Cat" is offloaded
+Sat Mar 18 20:20:27 2023
+:       Manifest located at ../sample_manifest/ShipCase1.txt is opened, there are 2 containers on the ship
+Sat Mar 18 20:20:27 2023
+:       TEST
+Sat Mar 18 20:22:11 2023
+:       Manifest located at ../sample_manifest/ShipCase1.txt is opened, there are 2 containers on the ship
+Sat Mar 18 20:22:11 2023
+:       Manifest located at ../sample_manifest/ShipCase1.txt is opened, there are 2 containers on the ship
+Sat Mar 18 20:22:11 2023
+:       Manifest located at ../sample_manifest/ShipCase1.txt is opened, there are 2 containers on the ship
+Sat Mar 18 20:22:11 2023
+:       Manifest located at ../sample_manifest/ShipCase4.txt is opened, there are 7 containers on the ship
+Sat Mar 18 20:22:11 2023
+:       Manifest located at ../sample_manifest/ShipCase1.txt is opened, there are 2 containers on the ship
+Sat Mar 18 20:22:11 2023
+:       Manifest located at ../sample_manifest/ShipCase1.txt is opened, there are 2 containers on the ship
+Sat Mar 18 20:22:11 2023
+:       Manifest located at ../sample_manifest/ShipCase6.txt is opened, there are 3 containers on the ship
+Sat Mar 18 20:22:11 2023
+:       Manifest located at ../sample_manifest/ShipCase6.txt is opened, there are 3 containers on the ship
+Sat Mar 18 20:22:11 2023
+:       Manifest located at ../sample_manifest/ShipCase4.txt is opened, there are 7 containers on the ship
+Sat Mar 18 20:22:11 2023
+:       Manifest located at ../sample_manifest/ShipCase1.txt is opened, there are 2 containers on the ship
+Sat Mar 18 20:22:11 2023
+:       "Bird" is loaded
+Sat Mar 18 20:22:11 2023
+:       Finished a cycle.
+Sat Mar 18 20:22:11 2023
+:       Manifest C:/Users/xinzh/Desktop/ShipCase1OUTBOUND.txt was written to desktop, and a reminder pop-up is displayed
+Sat Mar 18 20:22:11 2023
+:       Manifest located at ../sample_manifest/ShipCase1.txt is opened, there are 2 containers on the ship
+Sat Mar 18 20:22:11 2023
+:       Manifest located at ../sample_manifest/ShipCase1.txt is opened, there are 2 containers on the ship
+Sat Mar 18 20:22:11 2023
+:       Manifest located at ../sample_manifest/ShipCase1.txt is opened, there are 2 containers on the ship
+Sat Mar 18 20:22:11 2023
+:       "Bird" is loaded
+Sat Mar 18 20:22:11 2023
+:       "Bird" is loaded
+Sat Mar 18 20:22:11 2023
+:       Manifest located at ../sample_manifest/ShipCase1.txt is opened, there are 2 containers on the ship
+Sat Mar 18 20:22:11 2023
+:       Manifest located at ../sample_manifest/ShipCase1.txt is opened, there are 2 containers on the ship
+Sat Mar 18 20:22:11 2023
+:       Manifest located at ../sample_manifest/ShipCase6.txt is opened, there are 3 containers on the ship
+Sat Mar 18 20:22:11 2023
+:       Manifest located at ../sample_manifest/ShipCase4.txt is opened, there are 7 containers on the ship
+Sat Mar 18 20:22:11 2023
+:       Manifest located at ../sample_manifest/ShipCase7.txt is opened, there are 94 containers on the ship
+Sat Mar 18 20:22:11 2023
+:       Manifest located at ../sample_manifest/ShipCase7.txt is opened, there are 94 containers on the ship
+Sat Mar 18 20:22:11 2023
+:       Manifest located at ../sample_manifest/ShipCase1.txt is opened, there are 2 containers on the ship
+Sat Mar 18 20:22:11 2023
+:       Manifest located at ../sample_manifest/ShipCase3.txt is opened, there are 6 containers on the ship
+Sat Mar 18 20:22:11 2023
+:       Manifest located at ../sample_manifest/ShipCase7.txt is opened, there are 94 containers on the ship
+Sat Mar 18 20:22:11 2023
+:       Manifest located at ../sample_manifest/ShipCase1.txt is opened, there are 2 containers on the ship
+Sat Mar 18 20:22:11 2023
+:       "Cat" is offloaded
+Sat Mar 18 20:22:11 2023
+:       Manifest located at ../sample_manifest/ShipCase1.txt is opened, there are 2 containers on the ship
+Sat Mar 18 20:22:11 2023
+:       TEST
