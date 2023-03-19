@@ -12,7 +12,7 @@
 #include <chrono>
 #include <ctime> 
 #include <iomanip>
-//#include <shlobj.h>
+#include <shlobj.h>
 
 using namespace std;
 
@@ -22,7 +22,7 @@ enum CraneState {SHIP,TRUCK,BUFFER};
 
 
 struct Container{
-    int weight;
+    int weight = -1;
     string description;
     pair<int,int> XY;
     string key;
@@ -106,7 +106,6 @@ class mainApp{
         
         
         int calculateTime(pair<int,int>&, pair<int,int>&);
-        void calculateNumContainerAbove(int, State&);
         void updateNumContainerAbove(int, int, State&);
         
         Container getContainerWithKey(string&,State&);
@@ -121,6 +120,7 @@ class mainApp{
         int calculateEmptyColumn(State&, int);
         void addMoveOrder(State&, pair<int,int>,pair<int,int>,pair<int,int>);
         void createManifest();
+        void removeContainer(Container& container, State&);
 
         float calculateLeftSideWeight(State&);
         float calculateRightSideWeight(State&);
@@ -156,13 +156,14 @@ class mainApp{
         vector<pair<int,int>> getNextMoveSequence();
         int getEstimatedTimeInMin();
         State unload_load(vector<string>&, vector<Container>&);
-        State balanceSearch();
+        void balance();
         void addComments(string);
+        int numOfMovesRemain();
         
 
         Container getContainer(int, int);
-
-
+        
+        State balanceSearch();
 
 };
 

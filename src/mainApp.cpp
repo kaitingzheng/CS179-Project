@@ -1,3 +1,5 @@
+#pragma warning(disable : 4996)
+
 #include "../header/mainApp.h"
 #include <fstream>
 #include <string>
@@ -11,6 +13,10 @@ struct greater_than_key
 {
     inline bool operator() (const Container &struct1, const Container &struct2)
     {
+        if(struct1.numContainerAbove == struct2.numContainerAbove){
+            return (abs(struct1.XY.first - 8) + abs(struct1.XY.second +1)) > (abs(struct2.XY.first - 8) + abs(struct2.XY.second +1));
+            //return struct1.XY.second > struct2.XY.second;
+        }
         return (struct1.numContainerAbove > struct2.numContainerAbove);
     }
 };
@@ -85,7 +91,7 @@ void mainApp::parseManifest(){
             string weight = currLine.substr(10,5);
 
             string description = currLine.substr(18,currLine.size()-1);
-            description.erase(description.find_last_not_of(" \n\r\t")+1); //get rid of white space at end of line
+            //description.erase(description.find_last_not_of(" \n\r\t")+1); //get rid of white space at end of line
             if(description == "NAN") {
                 //cout << "At " << i << ", " << j << " : NAN" << endl;
                 Cell tempCell;
@@ -95,8 +101,8 @@ void mainApp::parseManifest(){
 
                 initState.ship[i][j] = tempCell;
             }
+
             else if(description == "UNUSED"){
-                 //cout << "At " << i << ", " << j << " : UNUSED" << endl;
                 Cell tempCell;
                 tempCell.status = UNUSED;
                 tempCell.XY.first = i;
@@ -111,7 +117,6 @@ void mainApp::parseManifest(){
             }
 
             else{
-                //cout << "At " << i << ", " << j << " : " << "Case 3" << endl;
                 Cell tempCell;
                 tempCell.status = USED;
                 tempCell.XY.first = i;
@@ -145,10 +150,9 @@ void mainApp::parseManifest(){
     }
 
     for(int i = 0; i < COLUMN_SHIP; i++){
-        calculateNumContainerAbove(i,initState);
+        updateNumContainerAbove(i,0,initState);
     }
 
-    //initState.balance = calculateBalance(initState);
     addComments("Manifest located at " + manifestName + " is opened, there are " + to_string(counter) + " containers on the ship");
 
 }
@@ -165,26 +169,8 @@ Container mainApp::getContainer(int x, int y){
     return noContainer;
 }
 
-void mainApp::calculateNumContainerAbove(int column, State &currState){
-    
-    int currentNumOfContainer = currState.numOfcontainerInColumn[column].second;
-    
-    int currentContainer = currState.numOfcontainerInColumn[column].first-1;
-    
-    if(currentNumOfContainer == 0){
-        return;
-    }
-    
-    int numAbove = 0;
-    while(currentNumOfContainer > 0){
-        currState.ship[currentContainer][column].container.numContainerAbove = numAbove;
-        numAbove++;
-        currentNumOfContainer--;
-        currentContainer--;
-    }
-}
-
 void mainApp::updateNumContainerAbove(int column, int numChanged, State &currState){
+
     currState.numOfcontainerInColumn[column].second += numChanged;
     currState.numOfcontainerInColumn[column].first += numChanged;
 
@@ -200,16 +186,28 @@ void mainApp::updateNumContainerAbove(int column, int numChanged, State &currSta
     }
 
     // update container in toBeUnloaded
-    
     for(int i = 0; i < currState.toBeUnloaded.size(); i++){
         int row = currState.toBeUnloaded[i].XY.first;
-        int column = currState.toBeUnloaded[i].XY.second;
+        int column2 = currState.toBeUnloaded[i].XY.second;
         
-        currState.toBeUnloaded[i].numContainerAbove = currState.ship[row][column].container.numContainerAbove;
+        currState.toBeUnloaded[i].numContainerAbove = currState.ship[row][column2].container.numContainerAbove;
+    }
+
+    for(int i = 0; i <  currState.numOfcontainerInColumn[column].first; i++){
+        string key = currState.ship[i][column].container.key;
+        int size_of_vec_container = currState.hashMapForContainer[key].size();
+        
+        for(int j = 0; j < size_of_vec_container; j++){
+            if(currState.hashMapForContainer[key][j].XY == currState.ship[i][column].container.XY){
+                int row = currState.ship[i][column].container.XY.first;
+                int column2 = currState.ship[i][column].container.XY.second;
+                
+                currState.hashMapForContainer[key][j].numContainerAbove = currState.ship[row][column2].container.numContainerAbove;
+            }
+        }
     }
 
 }
-
 
 // return container with key that has the least container above it
 Container mainApp::getContainerWithKey(string &key, State &currState){
@@ -218,17 +216,10 @@ Container mainApp::getContainerWithKey(string &key, State &currState){
     sort(temp.begin(), temp.end(), greater_than_key());
     Container unload = temp[temp.size()-1];
     
-    // update numOfContainerAbove
-    pair<int,int> a = unload.XY;
-    int numAbove = currState.ship[a.first][a.second].container.numContainerAbove;
-    unload.numContainerAbove = numAbove;
-
-
     return unload;
 }
 
 pair<int,int> mainApp::findHighestColumnBetween(pair<int,int> &orig, pair<int,int> &dest, State &currState){
-    
     int left = dest.second;
     int right = orig.second;
     pair<int,int> highestColumnBetween;
@@ -244,8 +235,6 @@ pair<int,int> mainApp::findHighestColumnBetween(pair<int,int> &orig, pair<int,in
     }
 
     int highestColumn = left+1;
-    //cout << "Left in findHighestColumn: " << left << endl;
-    //cout << "right in findHighestColumn: " << right << endl; 
     for(int i = left+1; i <= right; i++){
         if(left == -1){
             i++;
@@ -254,10 +243,10 @@ pair<int,int> mainApp::findHighestColumnBetween(pair<int,int> &orig, pair<int,in
             highestColumn = i;
         }
     }
-
+    
     highestColumnBetween.second = highestColumn;
     highestColumnBetween.first = currState.numOfcontainerInColumn[highestColumn].first;
-
+    
     return highestColumnBetween;
 }
 
@@ -419,13 +408,13 @@ bool mainApp::moveContainer(int destColumn, Container &container, State &currSta
            timeToMoveCrane+=TIME_FROM_SHIP_TO_BUFFER;
         }
         timeToMove += calculateTime(pinkCellBuffer, container.XY);
-        addMoveOrder(currState,currState.buffer.top().XY,pinkCellBuffer,pinkCellBuffer);
+        addMoveOrder(currState,container.XY,pinkCellBuffer,pinkCellBuffer);
 
         int emptyColumn = calculateEmptyColumn(currState, -1);
         moveContainer(emptyColumn,container,currState,2);
     }
     currState.time += timeToMove + timeToMoveCrane;
-    currState.cost = currState.time;
+    currState.cost = currState.time + (currState.toBeLoaded.size() + currState.toBeUnloaded.size() + currState.buffer.size())*10;
 
 
 
@@ -433,17 +422,17 @@ bool mainApp::moveContainer(int destColumn, Container &container, State &currSta
 }
 
 void mainApp::moveToBuffer(State &currState, Container container){
-    //if (container.description == "NAN" || container.description == "")
+
     if(currState.buffer.empty()){
-        container.XY.first == 0;
-        container.XY.second == COLUMN_BUFFER-1;
+        container.XY.first = 0;
+        container.XY.second = COLUMN_BUFFER-1;
         currState.buffer.push(container);
     }
     else{
         Container topContainer = currState.buffer.top();
         
         if(topContainer.XY.first+1 >= ROW_BUFFER){
-            container.XY.first == 0;
+            container.XY.first = 0;
             container.XY.second = topContainer.XY.second-1;
         }
         else{
@@ -501,10 +490,12 @@ State mainApp::unload_load(vector<string> &toBeUnloaded, vector<Container> &toBe
             // crane on ship then unload
             if(currState.craneState == SHIP){
                 unload_one(currState);
+                load_one(currState);
             }
             // crane on truck then load
             else if(currState.craneState == TRUCK){
                 load_one(currState);
+                unload_one(currState);
             }
             
         }
@@ -527,9 +518,12 @@ void mainApp::unload_one(State &currState){
     sort(currState.toBeUnloaded.begin(),currState.toBeUnloaded.end(),greater_than_key());
 
     Container currContainer = currState.toBeUnloaded.at(currState.toBeUnloaded.size()-1);
-
+    if(!currState.hashMapForContainer[currContainer.key].empty()){
+        currContainer = getContainerWithKey(currState.toBeUnloaded.at(currState.toBeUnloaded.size()-1).key, currState);
+    }
+    //Container currContainer = getContainerWithKey(currState.toBeUnloaded.at(currState.toBeUnloaded.size()-1).key, currState);
+    
     if(currContainer.numContainerAbove > 0){
-        
         int row = currState.numOfcontainerInColumn[currContainer.XY.second].first-1;
         int column = currContainer.XY.second;
         Container topContainer = currState.ship[row][column].container;
@@ -566,14 +560,11 @@ void mainApp::unload_one(State &currState){
         newState = currState;
         moveContainer(0,currContainer,newState,1);
         newState.toBeUnloaded.pop_back();
-
-
+        removeContainer(currContainer,newState);
         bestState.emplace(newState);
 
     }
 }
-
-
 
 void mainApp::load_one(State &currState){
     Container currContainer = currState.toBeLoaded.at(currState.toBeLoaded.size()-1);
@@ -881,8 +872,6 @@ State mainApp::siftProcedure() {
     vector<int> weightList;
     
     State currState = initState;
-    //Cell shipCopy[8][12];
-    //copy(&currState.ship[0][0],&currState.ship[0][0] + ROW_SHIP * COLUMN_SHIP , &shipCopy[0][0]);
     for (int i = 0; i < 8; i++) {
         for (int j = 0; j < 12; j++) {
             if (currState.ship[i][j].status == USED) {
@@ -1704,15 +1693,15 @@ void mainApp::moveToBufferBalance(State &currState, Container container){
 
     if(currState.buffer.empty()){
         cout << "buffer is empty" << endl;
-        container.XY.first == 0;
-        container.XY.second == COLUMN_BUFFER-1;
+        container.XY.first = 0;
+        container.XY.second = COLUMN_BUFFER-1;
         currState.buffer.push(container);
     }
     else{
         Container topContainer = currState.buffer.top();
 
         if(topContainer.XY.first+1 >= ROW_BUFFER){
-            container.XY.first == 0;
+            container.XY.first = 0;
             container.XY.second = topContainer.XY.second-1;
         }
         else{
@@ -1740,6 +1729,10 @@ int mainApp::calculateEmptyColumn(State& currState, int column){
         arr[currState.toBeUnloaded[i].XY.second] = true;
     }
 
+    pair<int,int> orig;
+    orig.second = column;
+    orig.first = currState.numOfcontainerInColumn[column].first-1;
+    
     for(int i = 0; i < COLUMN_SHIP; i++){
         if(arr[i] == false && currState.numOfcontainerInColumn[i].first < ROW_SHIP && i != column){
             if(column == -1){
@@ -1748,8 +1741,20 @@ int mainApp::calculateEmptyColumn(State& currState, int column){
             else if(index == -1){
                 index = i;
             }
-            else if(abs(i - column) < abs(index - column)){
-                index = i;
+            // else if(abs(i - column) < abs(index - column)){
+            //     index = i;
+            // }
+            else{
+                pair<int,int> best;
+                best.first = currState.numOfcontainerInColumn[index].first;
+                best.second = index;
+
+                pair<int,int> c;
+                c.first = currState.numOfcontainerInColumn[i].first;
+                c.second = i;
+                if(calculateTime(best,orig) > calculateTime(orig,c)){
+                    index = i;
+                }
             }
         }
     }
@@ -1771,12 +1776,8 @@ void mainApp::addMoveOrder(State &currState, pair<int,int> orig, pair<int,int> m
     vector<pair<int,int>> moveOrder;
 
     moveOrder.push_back(orig);
-    /*std::cout << "Adding orig to moveOrder: " << orig.first << ", " << orig.second << std::endl;
-    std::cout << "midPoint: " << midPoint.first << ", " << midPoint.second << std::endl;
-    std::cout << "dest: " << dest.first << ", " << dest.second << std::endl;*/
-    
+
     if(orig != pinkCell && dest != pinkCell){
-        //std::cout << "Inside orig and dest != pinkCell" << std::endl;
         while(orig != dest){
                 // dest is on the left
                 if(orig.second > dest.second){
@@ -1793,42 +1794,33 @@ void mainApp::addMoveOrder(State &currState, pair<int,int> orig, pair<int,int> m
                 else{
                     orig.first++;
                 }
-                //std::cout << "Updated orig added into moveOrder: " << orig.first << ", " << orig.second << std::endl;
 
                 moveOrder.push_back(orig);
         }
         currState.containerMoveOrder.push_back(moveOrder);
         return;
     }
-    
-    int limiter = 0;
+
     while(orig != midPoint){
-        //std::cout << "Inside orig != midPoint" << std::endl;
         // check if mid point is above orig, if above then we have to go up and over
         if(midPoint.first > orig.first){
-            //cout << "one" << endl;
             orig.first++;
         }
         // midpoint is on the left
         else if(orig.second > midPoint.second){
-            //cout << "two" << endl;
             orig.second--;
         }
         // midpoing is on the right
         else if(orig.second < midPoint.second){
-            //cout << "three" << endl;
             orig.second++;
         }
-        else if(midPoint.first < orig.first) {
+        else if(midPoint.first < orig.first){
             orig.first--;
         }
-        
-        //std::cout << "Updated orig added into moveOrder: " << orig.first << ", " << orig.second << std::endl;
         moveOrder.push_back(orig);
     }
 
     while(orig != dest){
-        //std::cout << "Inside orig != dest" << std::endl;
 
         // dest is on the left
         if(orig.second > dest.second){
@@ -1845,10 +1837,10 @@ void mainApp::addMoveOrder(State &currState, pair<int,int> orig, pair<int,int> m
         else{
             orig.first++;
         }
-        //std::cout << "Updated orig added into moveOrder: " << orig.first << ", " << orig.second << std::endl;
+
         moveOrder.push_back(orig);
     }
-    //std::cout << "moveOrder added into containerMoveOrder" << std::endl;
+
     currState.containerMoveOrder.push_back(moveOrder);
 
 }
@@ -1877,35 +1869,11 @@ vector<pair<int,int>> mainApp::getNextMoveSequence(){
     }
     else{
         addComments("Finished a cycle.");
-        //createManifest();
+        createManifest();
     }
     return List;
 }
-/*
-vector<pair<int,int>> mainApp::getNextMoveSequenceBalance(){
-    vector<pair<int,int>> List;
-    if(currMoveSequence < solutionState.containerMoveOrder.size()){
-       List = solutionState.containerMoveOrder[currMoveSequence];
-        currMoveSequence++;
-        pair<int,int> orig = List[0];
-        pair<int,int> dest = List[List.size()-1];
 
-        if(orig == pinkCell){ 
-           string containerDescription = solutionState.ship[dest.first][dest.second].container.description;
-           addComments('"' + containerDescription + '"' + " is being moved");
-        }
-        if(dest == pinkCell){
-            string containerDescription = initState.ship[orig.first][orig.second].container.description;
-            addComments('"' + containerDescription + '"' + " is offloaded");
-        }
-    }
-    else{
-        addComments("Finished a cycle.");
-        //createManifest();
-    }
-    return List;
-}
-*/
 int mainApp::getEstimatedTimeInMin(){
     return solutionState.time;
 }
@@ -1921,7 +1889,6 @@ void mainApp::addComments(string comment){
     Log_file.close();
 
 }
-/*
 void mainApp::createManifest(){
 
     TCHAR path[MAX_PATH] = {0};
@@ -1969,4 +1936,19 @@ void mainApp::createManifest(){
     }
 
     addComments("Manifest " + manifestName + " was written to desktop, and a reminder pop-up is displayed");
-}*/
+}
+
+int mainApp::numOfMovesRemain(){
+    return solutionState.containerMoveOrder.size()-currMoveSequence;
+}
+
+void mainApp::removeContainer(Container& container, State& currState){
+    vector<Container> containers;
+    for(int i = 0; i < currState.hashMapForContainer[container.key].size(); i++){
+        if(currState.hashMapForContainer[container.key][i].XY != container.XY){
+            containers.push_back(currState.hashMapForContainer[container.key][i]);
+        }
+    }
+
+    currState.hashMapForContainer[container.key] = containers;
+}
