@@ -162,12 +162,6 @@ class mainApp{
         Container getContainer(int, int);
         
         State balanceSearch();
-        void addComments(string);
-        
-
-        Container getContainer(int, int);
-
-
 
 };
 

@@ -91,7 +91,7 @@ void mainApp::parseManifest(){
             string weight = currLine.substr(10,5);
 
             string description = currLine.substr(18,currLine.size()-1);
-            description.erase(description.find_last_not_of(" \n\r\t")+1); //get rid of white space at end of line
+            //description.erase(description.find_last_not_of(" \n\r\t")+1); //get rid of white space at end of line
             if(description == "NAN") {
                 //cout << "At " << i << ", " << j << " : NAN" << endl;
                 Cell tempCell;
@@ -806,7 +806,8 @@ State mainApp::siftProcedure() {
     vector<int> weightList;
     vector<Container> orderedSift;
     State currState = initState;
-    Cell shipCopy[8][12] = currState.ship;
+    Cell shipCopy[8][12];
+    copy(&currState.ship[0][0],&currState.ship[0][0] + ROW_SHIP * COLUMN_SHIP , &shipCopy[0][0]);
     for (int i = 0; i < 8; i++) {
         for (int j = 0; j < 12; j++) {
             shipCopy[i][j].status = UNUSED;
@@ -1613,15 +1614,15 @@ void mainApp::moveToBufferBalance(State &currState, Container container){
 
     if(currState.buffer.empty()){
         cout << "buffer is empty" << endl;
-        container.XY.first == 0;
-        container.XY.second == COLUMN_BUFFER-1;
+        container.XY.first = 0;
+        container.XY.second = COLUMN_BUFFER-1;
         currState.buffer.push(container);
     }
     else{
         Container topContainer = currState.buffer.top();
 
         if(topContainer.XY.first+1 >= ROW_BUFFER){
-            container.XY.first == 0;
+            container.XY.first = 0;
             container.XY.second = topContainer.XY.second-1;
         }
         else{
