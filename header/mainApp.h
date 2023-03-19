@@ -156,7 +156,6 @@ class mainApp{
         vector<pair<int,int>> getNextMoveSequence();
         int getEstimatedTimeInMin();
         State unload_load(vector<string>&, vector<Container>&);
-        void balance();
         void addComments(string);
         int numOfMovesRemain();
         
