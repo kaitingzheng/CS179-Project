@@ -1319,7 +1319,7 @@ stack<Container> mainApp::balanceList(State &currState) {
     float leftSideWeight = calculateLeftSideWeight(currState);
     float rightSideWeight = calculateRightSideWeight(currState);
     float differenceWeight = 99999;
-    currState.estRemainingCost = calcMisplaced(currState);
+    //currState.estRemainingCost = calcMisplaced(currState);
         
     if ((rightSideWeight/leftSideWeight) < 0.9) { //less weight on right side then left
         //std::cout << "less weight on right than left" << std::endl;
@@ -1335,7 +1335,7 @@ stack<Container> mainApp::balanceList(State &currState) {
                         currContainer = currState.ship[i][j].container;
                         while (!balance_list.empty()) {
                             //cout << "checking for pop" << endl;
-                                if ((balance_list.top().weight == 0) || ((currContainer.weight/balance_list.top().weight) > 100) ) {
+                                if ((balance_list.top().weight == 0) || ((currContainer.weight/balance_list.top().weight) > 10) ) {
                                     //cout << "weight is 0" << endl;
                                     balance_list.pop();
                                 }
@@ -1364,7 +1364,7 @@ stack<Container> mainApp::balanceList(State &currState) {
                             currState.balanceDifference = dif;
                             currContainer = currState.ship[i][j].container;
                             while (!balance_list.empty()) {
-                                if ((balance_list.top().weight == 0) || ((currContainer.weight/balance_list.top().weight) > 100) ) {
+                                if ((balance_list.top().weight == 0) || ((currContainer.weight/balance_list.top().weight) > 10) ) {
                                     //cout << "weight is 0" << endl;
                                     balance_list.pop();
                                 }
