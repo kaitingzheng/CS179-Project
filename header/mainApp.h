@@ -26,6 +26,7 @@ struct Container{
     string description;
     pair<int,int> XY;
     string key;
+    bool siftPlaced = false;
     int numContainerAbove;
 };
 
@@ -129,6 +130,7 @@ class mainApp{
         bool moveContainerBalance(int column, Container&, State&, int);
         void moveToBufferBalance(State&, Container);
         bool siftCheck();
+        pair<int,int> findNearestContainer(int, pair<int,int>, State);
         State siftProcedure();
         int calcMisplaced(State&);
 
