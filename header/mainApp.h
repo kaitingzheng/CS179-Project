@@ -75,8 +75,6 @@ class balanceCompare{
     public:
         bool operator()(State &a, State &b){
            return a.cost > b.cost;
-            //return (a.cost + a.estRemainingCost > b.cost + b.estRemainingCost) || (a.balanceDifference > b.balanceDifference); //best heuristic for now, somehow????
-
         }
 };
 
@@ -133,7 +131,6 @@ class mainApp{
         bool siftCheck();
         pair<int,int> findNearestContainer(int, pair<int,int>, State);
         State siftProcedure();
-        //int calcMisplaced(State&);
 
         int ROW_SHIP = 8;
         int COLUMN_SHIP = 12;
