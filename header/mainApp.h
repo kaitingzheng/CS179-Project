@@ -12,7 +12,7 @@
 #include <chrono>
 #include <ctime> 
 #include <iomanip>
-#include <shlobj.h>
+//#include <shlobj.h>
 
 using namespace std;
 
@@ -74,8 +74,8 @@ class Compare{
 class balanceCompare{
     public:
         bool operator()(State &a, State &b){
-           
-            return (a.cost + a.estRemainingCost > b.cost + b.estRemainingCost) || (a.balanceDifference > b.balanceDifference); //best heuristic for now, somehow????
+           return a.cost > b.cost;
+            //return (a.cost + a.estRemainingCost > b.cost + b.estRemainingCost) || (a.balanceDifference > b.balanceDifference); //best heuristic for now, somehow????
 
         }
 };
@@ -125,6 +125,7 @@ class mainApp{
         float calculateLeftSideWeight(State&);
         float calculateRightSideWeight(State&);
         float calculateBalance(State&);
+        string generateBalanceString(State);
         stack<Container> balanceList(State&);
         void balance_one(State&, Container);
         bool moveContainerBalance(int column, Container&, State&, int);
@@ -132,7 +133,7 @@ class mainApp{
         bool siftCheck();
         pair<int,int> findNearestContainer(int, pair<int,int>, State);
         State siftProcedure();
-        int calcMisplaced(State&);
+        //int calcMisplaced(State&);
 
         int ROW_SHIP = 8;
         int COLUMN_SHIP = 12;
@@ -156,7 +157,6 @@ class mainApp{
         vector<pair<int,int>> getNextMoveSequence();
         int getEstimatedTimeInMin();
         State unload_load(vector<string>&, vector<Container>&);
-        void balance();
         void addComments(string);
         int numOfMovesRemain();
         
