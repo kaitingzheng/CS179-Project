@@ -90,8 +90,8 @@ void mainApp::parseManifest(){
         
             string weight = currLine.substr(10,5);
 
-            //string description = currLine.substr(18,currLine.size()-1);
-            description.erase(description.find_last_not_of(" \n\r\t")+1); //get rid of white space at end of line
+            string description = currLine.substr(18,currLine.size()-1);
+            //description.erase(description.find_last_not_of(" \n\r\t")+1); //get rid of white space at end of line
             if(description == "NAN") {
                 //cout << "At " << i << ", " << j << " : NAN" << endl;
                 Cell tempCell;
@@ -1728,7 +1728,7 @@ void mainApp::addComments(string comment){
 }
 void mainApp::createManifest(){
 
-   /* TCHAR path[MAX_PATH] = {0};
+    TCHAR path[MAX_PATH] = {0};
 
     SHGetSpecialFolderPath(NULL, path, CSIDL_DESKTOPDIRECTORY, FALSE);
 
@@ -1772,7 +1772,7 @@ void mainApp::createManifest(){
         }
     }
 
-    addComments("Manifest " + manifestName + " was written to desktop, and a reminder pop-up is displayed");*/
+    addComments("Manifest " + manifestName + " was written to desktop, and a reminder pop-up is displayed");
 }
 
 int mainApp::numOfMovesRemain(){
