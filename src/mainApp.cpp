@@ -708,12 +708,12 @@ State mainApp::balanceSearch(){ //balance
             currState.depth++;
                 //currState.balance = curBal;
             if( (curBal > 0.89) && (curBal < 1.11) && (currState.buffer.empty())){
-                    // found best solution
-                    //std::cout << "goal reached" << std::endl;
+                // found best solution
+                //std::cout << "goal reached" << std::endl;
                 //std::cout << calculateBalance(currState) << std::endl;
-                    //std::cout << "goal cost: " << currState.cost << std::endl;
-                cout << "Iterations : " << iter << endl;
-                cout << "Duplicates : " << duplicates << endl;
+                //std::cout << "goal cost: " << currState.cost << std::endl;
+                //cout << "Iterations : " << iter << endl;
+                //cout << "Duplicates : " << duplicates << endl;
                 solutionState=currState;
                 return solutionState;
             }
