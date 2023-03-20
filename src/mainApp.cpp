@@ -103,6 +103,7 @@ void mainApp::parseManifest(){
             }
 
             else if(description == "UNUSED"){
+                //cout << "At " << i << ", " << j << " : UNUSED" << endl;
                 Cell tempCell;
                 tempCell.status = UNUSED;
                 tempCell.XY.first = i;
@@ -117,6 +118,7 @@ void mainApp::parseManifest(){
             }
 
             else{
+                //cout << "At " << i << ", " << j << " : Container here" << endl;
                 Cell tempCell;
                 tempCell.status = USED;
                 tempCell.XY.first = i;
@@ -638,107 +640,117 @@ float mainApp::calculateBalance(State &currState){
         return calculateRightSideWeight(currState)/calculateLeftSideWeight(currState);
 }
 
+string mainApp::generateBalanceString(State currState) { //pseudohash
+    string shipKey = "|";
+    for (int i = 7; i > -1; i--) {
+        for (int j = 0; j < 12; j++) {
+            if (currState.ship[i][j].status == UNUSED) {
+                shipKey += "U|";
+            }
+            else if (currState.ship[i][j].status == NOTEXIST) {
+                shipKey += "-|";
+            }
+            else {
+                shipKey += currState.ship[i][j].container.weight + " | ";
+            }
+        }
+    }
+    
+    return shipKey;   
+    
+}
+
 State mainApp::balanceSearch(){ //balance
 	if (siftCheck()) {
-        cout << "SIFT is necessary" << endl;
+        //cout << "SIFT is necessary" << endl;
         return siftProcedure();
     }
     
-       bestStateBalance.emplace(initState);
+    bestStateBalance.emplace(initState);
 	
-        State currState;
+    State currState;
 
-        stack<Container> toBeBalanced;
-        Container currCont;
+    stack<Container> toBeBalanced;
+    Container currCont;
         //int leastRemainingTime = 999999;
-        int iter = 0;
-        while(bestStateBalance.size() > 0){
-            cout << "iter : " << iter << endl;
+    int iter = 0;
+    int duplicates = 0;
+    vector<string> checkDuplicates;
+    string shipKey = "";
+    bool doNotExpand = false;
+    while(bestStateBalance.size() > 0){
+        doNotExpand = false;
+            //cout << "iter : " << iter << endl;
             //cout << "priority queue size : " << bestStateBalance.size() << endl;
             
-            iter++;
+        iter++;
             
-            currState = bestStateBalance.top();
-            bestStateBalance.pop();
-           
-            //cout << currState.cost << endl;
-            //----for debug purposes-------
-            
-            for (int i = 7; i > -1; i--) {
-                for (int j = 0; j < 12; j++) {
-                    if (currState.ship[i][j].status == UNUSED) {
-                        cout << "000" << " | ";
-                    }
-                    else if (currState.ship[i][j].status == NOTEXIST) {
-                        cout << "---" << " | ";
-                    }
-                    else {
-                        cout << currState.ship[i][j].container.description << " | ";
-                    }
-                }
-                cout << endl;
-            }
-            
-            cout << "_______________________________________"<<endl;
+        currState = bestStateBalance.top();
+        bestStateBalance.pop();
 
-            for (int i = 7; i > -1; i--) {
-                        for (int j = 0; j < 12; j++) {
-                                if (currState.ship[i][j].status == USED) {
-                                        cout << currState.ship[i][j].container.weight << " | ";
-                                }
-                                else if (currState.ship[i][j].status == NOTEXIST) {
-                                        cout << "----" << " | ";
-                                }
-                                else {
-                                    cout << "UNUSED" << " | ";
-                                }
-                        }
-                        cout << endl;
-                }
-            //-------
-            //cout << "checking" << endl;
+           
+        shipKey = generateBalanceString(currState);
+        for (int i = 0; i < checkDuplicates.size(); i++) {
+            if (shipKey == checkDuplicates.at(i)) {
+                doNotExpand = true;
+            }
+        }
+        if (doNotExpand == true) {
+            //cout << "duplicates found" << endl;
+            duplicates++;
+            continue;
+        }
+        else {
+            checkDuplicates.push_back(shipKey);
+            
+                //cout << "checking" << endl;
             float curBal = calculateBalance(currState);
             currState.depth++;
-            int duplicates = 0;
-            //currState.balance = curBal;
+                //currState.balance = curBal;
             if( (curBal > 0.89) && (curBal < 1.11) && (currState.buffer.empty())){
                 // found best solution
-                std::cout << "goal reached" << std::endl;
-                std::cout << calculateBalance(currState) << std::endl;
-                std::cout << "goal cost: " << currState.cost << std::endl;
+                //std::cout << "goal reached" << std::endl;
+                //std::cout << calculateBalance(currState) << std::endl;
+                //std::cout << "goal cost: " << currState.cost << std::endl;
+                //cout << "Iterations : " << iter << endl;
+                //cout << "Duplicates : " << duplicates << endl;
                 solutionState=currState;
                 return solutionState;
             }
 
-            // balance
+                // balance
             else if((curBal < 0.9) || (curBal > 1.1)){ 
-                //cout << "checking 2" << endl;
+                    //cout << "checking 2" << endl;
                 toBeBalanced = balanceList(currState);
-                //cout << "depth: " << currState.depth << endl;
-                cout << curBal << endl;
+                    //cout << "depth: " << currState.depth << endl;
+                    //cout << curBal << endl;
                 while (!toBeBalanced.empty()) {
-                    //cout << "checking" << toBeBalanced.size() << endl;
+                        //cout << "checking" << toBeBalanced.size() << endl;
                     currCont = toBeBalanced.top();
                     toBeBalanced.pop();
                     balance_one(currState, currCont);
                 }
-                
+                    
             }
 
-            // buffer to ship
+                // buffer to ship
             else if(!currState.buffer.empty()){
+                    //cout << "buffer enter" << endl;
                 Container currContainer = currState.buffer.top();
                 currState.buffer.pop();
                 moveContainerBalance(-1,currContainer,currState,3);
-    
+        
                 bestStateBalance.emplace(currState);
             }
 
         }
-        //cout << "what" << endl;
+            
+            
         
-        return initState;
     }
+    return initState;
+}
+
 bool mainApp::siftCheck() { 
     State dummyState = initState;
     Container currContainer;
@@ -768,7 +780,7 @@ bool mainApp::siftCheck() {
         for (int i = 0; i < weightList2.size(); i++) {
             weight2 += weightList2.at(i).weight;
         }
-        cout << weight2/weight1 << endl;
+        //cout << weight2/weight1 << endl;
         if ((weight2/weight1) > 0.89 && (weight2/weight1) < 1.11) {
             return false;
         }
@@ -791,9 +803,8 @@ bool mainApp::siftCheck() {
                 currContainer = weightList1.at(moveNumber);
                 //cout << "currContainer weight: " << currContainer.weight << endl;
                 weightList2.push_back(currContainer);
-                cout << weightList1.at(moveNumber).weight << endl;
                 weightList1.erase(weightList1.begin()+moveNumber);
-                cout << weightList1.at(moveNumber).weight << endl;
+                
             }
                     //cout << "currContainer selected at : " << i << ", " << j << endl;
         }
@@ -820,9 +831,7 @@ bool mainApp::siftCheck() {
                 currContainer = weightList2.at(moveNumber);
                         
                 weightList1.push_back(currContainer);
-                cout << weightList2.at(moveNumber).weight << endl;
                 weightList2.erase(weightList2.begin()+moveNumber);
-                cout << weightList2.at(moveNumber).weight << endl;
             }
         }
         moveNumber = -1;
@@ -867,8 +876,6 @@ pair<int,int> mainApp::findNearestContainer(int weight, pair<int,int> dest, Stat
     return finalOrig;
 }
 State mainApp::siftProcedure() {
-    //cout << "siftProcedure" <<endl;
-    //bestState.clear();
     vector<int> weightList;
     
     State currState = initState;
@@ -884,7 +891,19 @@ State mainApp::siftProcedure() {
     pair<int,int> dest;
     int middleOfShip = 5;
     vector<pair<int,int>> destList;
+    int siftGoal[8][12];
 
+    for (int i = 0; i < 8; i++) {
+        for (int j = 0; j < 12; j++) {
+            
+            if (currState.ship[i][j].status != NOTEXIST) { // done
+                siftGoal[i][j] = -1;
+            }
+            else {
+                siftGoal[i][j] = -2;
+            }
+        }
+    }
     for (int i = 0; i < 8; i++) {
         for (int j = 0; j < 12; j++) {
             
@@ -901,58 +920,59 @@ State mainApp::siftProcedure() {
                 middleOfShip += j;
             }
             dest.second = middleOfShip;
+
+            
             if (currState.ship[dest.first][dest.second].status == NOTEXIST) { //move to next row
                 break;
             }
             else {
-                //cout << "coords: " << i << ", " << middleOfShip << endl;
+                //cout << "coords: " << dest.first << ", " << dest.second << endl;
+                //cout << "destList.size : " << destList.size() << endl;
+                siftGoal[dest.first][dest.second] = weightList.at(destList.size());
+                //cout << siftGoal[dest.first][dest.second] << endl;
                 destList.push_back(dest);
             }
         }
         middleOfShip =5;
     }
-    
+/*
+    for (int i = 7; i > -1; i--) {
+        for (int j = 0; j < 12; j++) {
+            int check =siftCheck[i][j];
+            cout << check << " ";
+        }
+        cout << endl;
+    }*/
+
+    //siftPlacement(weightList, destList, currState);
+    bestState.emplace(initState);
+
+    /*while(bestState.size() > 0){
+        currState = bestState.top();
+        bestState.pop();
+        
+    }*/
+    int choosePos = 0;
     while (!destList.empty()) {
-        /*for (int i = 7; i > -1; i--) {
-                for (int j = 0; j < 12; j++) {
-                    if (currState.ship[i][j].status == UNUSED) {
-                        cout << "000" << " | ";
-                    }
-                    else if (currState.ship[i][j].status == NOTEXIST) {
-                        cout << "---" << " | ";
-                    }
-                    else {
-                        cout << currState.ship[i][j].container.description << " | ";
-                    }
-                }
-                cout << endl;
+        int checkRow = destList.at(0).first;
+        int choosePos = 0;
+        for (choosePos = 0; choosePos < destList.size(); choosePos++) {
+            if (checkRow != destList.at(choosePos).first) {
+                choosePos = 0;
+                break;
             }
-            
-            cout << "_______________________________________"<<endl;
-
-            for (int i = 7; i > -1; i--) {
-                        for (int j = 0; j < 12; j++) {
-                                if (currState.ship[i][j].status == USED) {
-                                        cout << currState.ship[i][j].container.weight << " | ";
-                                }
-                                else if (currState.ship[i][j].status == NOTEXIST) {
-                                        cout << "----" << " | ";
-                                }
-                                else {
-                                    cout << "UNUSED" << " | ";
-                                }
-                        }
-                        cout << endl;
-                }
-
-        cout << endl;*/
-        pair<int,int> containerOrig = findNearestContainer(weightList.at(0), destList.at(0), currState);
+            if (currState.ship[destList.at(choosePos).first][destList.at(choosePos).second].status == UNUSED) {
+                break;
+            }
+        }
+        pair<int,int> containerOrig = findNearestContainer(weightList.at(choosePos), destList.at(choosePos), currState);
         Container& currContainer = currState.ship[containerOrig.first][containerOrig.second].container;
         //cout << "Coordinates: " << destList.at(0).first << ", " << destList.at(0).second << " | currContainer: " << currContainer.description << ", "<< currContainer.weight << endl;
         //cout << "container currently located at " << currContainer.XY.first << ", " << currContainer.XY.second << endl;
-        if (currContainer.XY == destList.at(0)) {
-            weightList.erase(weightList.begin());
-            destList.erase(destList.begin());
+
+        if (currContainer.XY == destList.at(choosePos)) {
+            weightList.erase(weightList.begin() + choosePos);
+            destList.erase(destList.begin() + choosePos);
             currState.ship[currContainer.XY.first][currContainer.XY.second].container.siftPlaced = true;
             currContainer.siftPlaced = true;
             continue;
@@ -965,12 +985,31 @@ State mainApp::siftProcedure() {
             int top1 = topContainer.XY.first;
             int top2 = topContainer.XY.second;
             pair<int,int> oldXY = topContainer.XY;
+            int timeTrack = 99999;
             //std::cout <<"Need to move container at :" <<  top1 << ", " << top2 << std::endl;
+            State dummyState = currState;
+            checkRow = destList.at(0).first;
+            for (int i = 0; i < destList.size(); i++) {
+                if (checkRow != destList.at(0).first) {
+                    break;
+                }
+                pair<int, int> checkCoords = findNearestContainer(weightList.at(i), destList.at(i), currState);
+                int topCost = calculateTime(checkCoords, destList.at(i));
+                if (checkCoords == topContainer.XY && topCost < timeTrack && currState.ship[checkCoords.first][checkCoords.second].status != USED) {
+                    moveContainerBalance(checkCoords.second,topContainer,currState,0);
+                    timeTrack = topCost;
+                }
+            }
             
+            if (timeTrack != 99999) {
+                //cout << "found other area" << endl;
+                currState = dummyState;
+            }
+            else {
             for(int j = 0; j < COLUMN_SHIP; j++){
                 
                 // not in the same column
-                if(j != destList.at(0).second && j != currContainer.XY.second){
+                if(j != destList.at(choosePos).second && j != currContainer.XY.second){
                     State newState;
                     
                     int emptyColumn = calculateEmptyColumn(currState,currContainer.XY.second);
@@ -983,14 +1022,24 @@ State mainApp::siftProcedure() {
                         break;
                     }
                         // found a column that we can put on
-                    else if(emptyColumn != -1 && emptyColumn != currContainer.XY.second && emptyColumn != destList.at(0).second){
-                        newState = currState;
+                    else if(emptyColumn != -1 && emptyColumn != currContainer.XY.second && emptyColumn != destList.at(choosePos).second){
+                        //dummyState = currState;
                         //std::cout <<"Found a column to place the top container at :" << emptyColumn << std::endl;
                         //cout << "currContainer.second : " << currContainer.XY.second << endl;
                         //cout << "destList.at(0).second : " << destList.at(0).second << endl;
-                        moveContainerBalance(emptyColumn, topContainer, newState,0);
+                        moveContainerBalance(emptyColumn, topContainer, dummyState,0);
                         //cout << "new coords :" << topContainer.XY.first << ", " << topContainer.XY.second << endl;
-                        currState = newState;
+                        /*if (calculateTime(oldXY, topContainer.XY) < timeTrack ) {
+                            currState = dummyState;
+                            timeTrack = calculateTime(oldXY, topContainer.XY);
+                        } 
+                        else if (calculateTime(oldXY, topContainer.XY) == timeTrack) {
+                            if (topContainer.XY.second <= oldXY.second) {
+                                currState = dummyState;
+                            }
+                        }*/
+                        currState = dummyState;
+                        //currState = newState;
                         break;
                     }
                     else{
@@ -1001,24 +1050,46 @@ State mainApp::siftProcedure() {
                     }
                 }
             }
+            }
+            //currState = dummyState;
         }
-        else if (currState.ship[destList.at(0).first][destList.at(0).second].status == USED) {
+        else if (currState.ship[destList.at(choosePos).first][destList.at(choosePos).second].status == USED) {
             
                 //std::cout <<"Container found at or above destination" << std::endl;
-            int row = currState.numOfcontainerInColumn[destList.at(0).second].first-1;
-            int column = destList.at(0).second;
+            int row = currState.numOfcontainerInColumn[destList.at(choosePos).second].first-1;
+            int column = destList.at(choosePos).second;
             Container& topContainer = currState.ship[row][column].container;
             pair<int, int> oldXY = topContainer.XY;
                 //cout << "Have to move container at : " << row << ", " << column << endl;
                 //cout << "Description: " << topContainer.description << " weight: " << topContainer.weight << endl;
                 //std::cout <<"Need to move container at :" <<  top1 << ", " << top2 << std::endl;
-                
+            int timeTrack = 99999;
+            //std::cout <<"Need to move container at :" <<  top1 << ", " << top2 << std::endl;
+            State dummyState = currState;
+            int checkRow = destList.at(0).first;
+            for (int i = 0; i < destList.size(); i++) {
+                if (checkRow != destList.at(0).first) {
+                    break;
+                }
+                pair<int, int> checkCoords = findNearestContainer(weightList.at(i), destList.at(i), currState);
+                int topCost = calculateTime(checkCoords, destList.at(i));
+                if (checkCoords == topContainer.XY && topCost < timeTrack && currState.ship[checkCoords.first][checkCoords.second].status != USED) {
+                    moveContainerBalance(checkCoords.second,topContainer,currState,0);
+                    timeTrack = topCost;
+                }
+            }
+            
+            if (timeTrack != 99999) {
+                currState = dummyState;
+                //cout << "found other area" << endl;
+            }
+            else {
             for(int j = 0; j < COLUMN_SHIP; j++){
                 State newState;
                     // not in the same column or column that 
-                if(j != destList.at(0).second && j != currContainer.XY.second){
+                if(j != destList.at(choosePos).second && j != currContainer.XY.second){
                     newState = currState;
-                    int emptyColumn = calculateEmptyColumn(currState,destList.at(0).second);
+                    int emptyColumn = calculateEmptyColumn(currState,destList.at(choosePos).second);
 
                     if(emptyColumn == -2){
                             //std::cout <<"No columns available, need to use buffer" << std::endl;
@@ -1029,12 +1100,22 @@ State mainApp::siftProcedure() {
                         break;
                     }
                             // found a column that we can put on
-                    else if(emptyColumn != -1 && emptyColumn != currContainer.XY.second && emptyColumn != destList.at(0).second){
+                    else if(emptyColumn != -1 && emptyColumn != currContainer.XY.second && emptyColumn != destList.at(choosePos).second){
                             //std::cout << "Found a column to place the top container at :" << emptyColumn << std::endl;
-                        moveContainerBalance(emptyColumn, topContainer, currState,0);
+                        moveContainerBalance(emptyColumn, topContainer, dummyState,0);
                             //cout << "new coords :" << topContainer.XY.first << ", " << topContainer.XY.second << endl;
                             //bestState.emplace(newState);
                             //currState = newState;
+                        /*if (calculateTime(oldXY, topContainer.XY) < timeTrack ) {
+                            currState = dummyState;
+                            timeTrack = calculateTime(oldXY, topContainer.XY);
+                        } 
+                        else if (calculateTime(oldXY, topContainer.XY) == timeTrack) {
+                            if (topContainer.XY.second <= oldXY.second) {
+                                currState = dummyState;
+                            }
+                        }*/
+                        currState = dummyState;
                         break;
                     }
                     else{
@@ -1046,17 +1127,18 @@ State mainApp::siftProcedure() {
                     
                 }
             }
+            }
             
         }
         else{
             State newState;
             newState = currState;
-            //std::cout <<"Moving container to column: " << destList.at(0).second << std::endl;
-            moveContainerBalance(destList.at(0).second,currContainer, currState,0);
+            //std::cout <<"Moving container to column: " << destList.at(choosePos).second << std::endl;
+            moveContainerBalance(destList.at(choosePos).second,currContainer, currState,0);
             //cout << "currCont : " << currContainer.XY.first << ", " << currContainer.XY.second << endl;
-            //cout << "intended Dest: " << destList.at(0).first << ", " << destList.at(0).second << endl;
-            weightList.erase(weightList.begin());
-            destList.erase(destList.begin());
+            //cout << "intended Dest: " << destList.at(choosePos).first << ", " << destList.at(choosePos).second << endl;
+            weightList.erase(weightList.begin() + choosePos);
+            destList.erase(destList.begin() + choosePos);
             currState.ship[currContainer.XY.first][currContainer.XY.second].container.siftPlaced = true;
             currContainer.siftPlaced = true;
             bestState.emplace(newState);
@@ -1068,249 +1150,7 @@ State mainApp::siftProcedure() {
 }
 
 
-int mainApp::calcMisplaced(State &currState) { //scuffed heuristic, tries to return estimate of remaining minutes based on misplaced tiles
-    vector<int> weightList;
-    vector<Container> containerList;
-    vector<Container> containerTopList;
 
-    float leftSideWeight = calculateLeftSideWeight(currState);
-    float rightSideWeight = calculateRightSideWeight(currState);
-    int weightSum = 0;
-    int misplaced = 0;
-    float ammendedLeft = leftSideWeight;
-    float ammendedRight = rightSideWeight;
-    int iterMis = 0;
-    int numContAbove = 0;
-    pair<int,int> orig;
-    pair<int,int> dest;
-    pair<int,int> origCheck;
-    pair<int,int> destCheck;
-    int iterCheck = 99;
-
-    origCheck.first = 99;
-    origCheck.second = 99;
-    destCheck.first = 99;
-    destCheck.second = 99;
-
-    int estTime = 0;
-
-    while ((!( (ammendedRight/ammendedLeft) > 0.89 && (ammendedRight/ammendedLeft) < 1.11)) && (iterMis <= misplaced)) {
-        containerList.clear();
-        containerTopList.clear();
-        if ((ammendedRight/ammendedLeft) < 0.9) { //less weight on right side then left
-            //std::cout << "less weight on right than left" << std::endl;
-            for (int i = 7; i > -1; i--) {
-                for (int j = 5; j > -1; j--) {
-                    //cout << "at " << i << ", " << j << endl;
-                    if (currState.ship[i][j].status == USED) {
-                        weightList.push_back(currState.ship[i][j].container.weight);
-                        
-                    }
-                }
-            }
-            sort(weightList.begin(), weightList.end(), greater<int>());
-            //cout << "a" << endl;
-            while (!weightList.empty()) {
-                for (int i = 0; i < 8; i++) {
-                    for (int j = 0; j < 6; j++) {
-                        if (currState.ship[i][j].status == USED) {
-                            if (weightList.at(0) == currState.ship[i][j].container.weight) {
-                                //cout << "ij " << i << ", " << j << endl;
-                                containerList.push_back(currState.ship[i][j].container);
-                                //cout << "pushed" << endl;
-                                weightList.erase(weightList.begin());
-                                //cout << "erased" << endl;
-                                //if (weightList.empty()) {
-                                //    cout << "empty" << endl;
-                                //}
-                                i+=10;
-                                j+= 20;
-                            }
-                        }
-                    }
-                }
-            }
-            //cout << "b" << endl;
-            for (int i = 0; i < containerList.size(); i++) {
-                weightSum += containerList[i].weight;
-                ammendedLeft -= containerList[i].weight;
-                ammendedRight += containerList[i].weight;
-                misplaced++;
-                if ( ((ammendedRight/ammendedLeft) > 0.89) && ((ammendedRight/ammendedLeft) < 1.11)) {
-                    break;
-                }
-                else if  ((ammendedRight/ammendedLeft) < 0.9) {
-                    continue;
-                }
-                else if ((ammendedRight/ammendedLeft) > 1.10) {
-                    //misplaced++;
-                    break;
-                }
-
-            }
-            for (int i = 0; i < 8; i++) {
-                for (int j = 6; j < 12; j++) {
-                    if (currState.ship[i][j].status == UNUSED) {
-                    
-                        orig.first = containerList[iterMis].XY.first;
-                        orig.second = containerList[iterMis].XY.second;
-                        dest.first = i;
-                        dest.second = j;
-                        if (destCheck.first == 99) {
-                            origCheck = orig;
-                            destCheck = dest;
-                            iterCheck = iterMis+1;
-                        }
-                        
-                        //cout << "orig : " << orig.first << ", " << orig.second << " | dest : " << dest.first << ", " << dest.second << " | iter: " << iterMis << " | misplaced : " << misplaced << endl;
-                        estTime += calculateTime(orig, dest);
-                        estTime += containerList[iterMis].numContainerAbove;
-                        /*if (containerList[iterMis].numContainerAbove > 0) {
-
-                            for(int k = 0; k < COLUMN_SHIP; k++){
-                                // not in the same column
-                                for (int m = 0; m < containerList[iterMis].numContainerAbove; m++) {
-                                if(k != containerList[iterMis].XY.second){
-                                    int emptyColumn = calculateEmptyColumn(currState,containerList[iterMis].XY.second);
-
-                                    if(emptyColumn == -2){
-                                        break;
-                                    }
-                                    // found a column that we can put on
-                                    else if(emptyColumn != -1){
-                                        //std::cout <<"Found a column to place the top container at :" + emptyColumn << std::endl;
-                                        for (int l = 0; l < 8; l++) {
-                                            if (currState.ship[l][emptyColumn].status == UNUSED) {
-                                                orig.second+=1;
-                                                dest.first = l;
-                                                dest.second = emptyColumn;
-                                                estTime += calculateTime(orig, dest);
-                                                k+=12;
-                                                l+=8;
-                                                break;
-                                            }
-                                        }
-                                        break;
-                                    }
-                                    else{
-                                        }
-                                    }
-                                }
-                            }
-                        }*/
-                        iterMis++;
-                        if (iterMis >= misplaced) {
-                            j+= 10;
-                            i += 10;
-                            break;
-                        }
-                    }
-                }
-            }
-        
-        }
-        
-        else if ((ammendedRight/ammendedLeft) > 1.1) { // less weight on left than right
-            //std::cout <<"less weight on left than right" << std::endl;
-            for (int i = 7; i > -1; i--) {
-                for (int j = 6; j < 12; j++) {
-                    //cout << "at " << i << ", " << j << endl;
-                    if (currState.ship[i][j].status == USED) {
-                        weightList.push_back(currState.ship[i][j].container.weight);
-                    }
-                }
-            }
-
-            sort(weightList.begin(), weightList.end(), greater<int>());
-            while (!weightList.empty()) {
-                for (int i = 0; i < 8; i++) {
-                    for (int j = 6; j < 12; j++) {
-                        if (currState.ship[i][j].status == USED) {
-                            if (weightList.at(0) == currState.ship[i][j].container.weight) {
-                                containerList.push_back(currState.ship[i][j].container);
-                                weightList.erase(weightList.begin());
-                                i+=10;
-                                j+=20;
-                            }
-                        }
-                    }
-                }
-            }
-            for (int i = 0; i < containerList.size(); i++) {
-                weightSum += containerList[i].weight;
-                ammendedLeft += containerList[i].weight;
-                ammendedRight -= containerList[i].weight;
-                misplaced++;
-                if ( ((ammendedRight/ammendedLeft) > 0.89) && ((ammendedRight/ammendedLeft) < 1.11)) {
-                    break;
-                }
-                else if  ((ammendedRight/ammendedLeft) < 0.9) {
-                    //misplaced++;
-                    break;
-                }
-                else if ((ammendedRight/ammendedLeft) > 1.1) {
-                    
-                    continue;
-                }
-
-            }
-            for (int i = 0; i < 8; i++) {
-                for (int j = 5; j > -1; j--) {
-                    if (currState.ship[i][j].status == UNUSED) {
-                        orig.first = containerList[iterMis].XY.first;
-                        orig.second = containerList[iterMis].XY.second;
-                        dest.first = i;
-                        dest.second = j;
-                        //cout << "orig : " << orig.first << ", " << orig.second << " | dest : " << dest.first << ", " << dest.second << " | iter: " << iterMis << " | misplaced : " << misplaced << endl;
-                        estTime += calculateTime(orig, dest);
-                        estTime += containerList[iterMis].numContainerAbove;
-                        /*if (containerList[iterMis].numContainerAbove > 0) {
-                            for (int m = 0; m < containerList[iterMis].numContainerAbove; m++) {
-                                for(int k = 0; k < COLUMN_SHIP; k++){
-                                // not in the same column
-                                    if(k != containerList[iterMis].XY.second){
-                                        int emptyColumn = calculateEmptyColumn(currState,containerList[iterMis].XY.second);
-
-                                        if(emptyColumn == -2){
-                                            break;
-                                        }
-                                        // found a column that we can put on
-                                        else if(emptyColumn != -1){
-                                        //std::cout <<"Found a column to place the top container at :" + emptyColumn << std::endl;
-                                            for (int l = 0; l < 8; l++) {
-                                                if (currState.ship[l][emptyColumn].status == UNUSED) {
-                                                    orig.second+=1;
-                                                    dest.first = l;
-                                                    dest.second = emptyColumn;
-                                                    estTime += calculateTime(orig, dest);
-                                                    l+=9;
-                                                    k+=12;
-                                                    break;
-                                                }
-                                            }
-                                            break;
-                                        }
-                                        else{
-                                            }
-                                        }
-                                    }
-                                }
-                        }*/
-                        iterMis++;
-                        if (iterMis >= misplaced) {
-                            j-= 10;
-                            i += 10;
-                            break;
-                        }
-                    }
-
-                }
-            }
-        }
-    }
-    return estTime;
-    
-}
 //selects containers
 stack<Container> mainApp::balanceList(State &currState) {
     Container currContainer;
@@ -1389,10 +1229,10 @@ void mainApp::balance_one(State &currState, Container curr) {
         float rightSideWeight = calculateRightSideWeight(currState);
         
         
-	    /*int currCont1 = currContainer.XY.first;
+	    int currCont1 = currContainer.XY.first;
 	    int currCont2 = currContainer.XY.second;
-        std::cout <<"Container selected at :" << currCont1 << ", " << currCont2 << " Description: " << currContainer.description << " Weight: " << currContainer.weight << std::endl;
-        */
+        //std::cout <<"Container selected at :" << currCont1 << ", " << currCont2 << " Description: " << currContainer.description << " Weight: " << currContainer.weight << std::endl;
+        
         if(currContainer.numContainerAbove > 0){
             //std::cout <<"Container found above our desired one" << std::endl;
             int row = currState.numOfcontainerInColumn[currContainer.XY.second].first-1;
@@ -1639,9 +1479,6 @@ bool mainApp::moveContainerBalance(int destColumn, Container &container, State &
                 if (!((container.XY.first < 0) || (container.XY.second < 0))) {
                     currState.ship[container.XY.first][container.XY.second].status = UNUSED;
                 }
-                /*if (currState.ship[5][0].status == UNUSED) {
-                    cout << "check status of 5,0: UNUSED" << endl;
-                }*/
                 currState.ship[dest.first][dest.second].status = USED;
                 currState.ship[dest.first][dest.second].container = container;
 		        currState.ship[dest.first][dest.second].container.XY = dest;
@@ -1710,7 +1547,7 @@ void mainApp::moveToBufferBalance(State &currState, Container container){
         }
         currState.buffer.push(container);
     }
-    cout << "Buffer containers: " << currState.buffer.size() << endl;
+    //cout << "Buffer containers: " << currState.buffer.size() << endl;
     currState.craneLocation = container.XY;
     currState.time += calculateTime(pinkCellBuffer, container.XY);
     addMoveOrder(currState,pinkCellBuffer,pinkCellBuffer,currState.buffer.top().XY);

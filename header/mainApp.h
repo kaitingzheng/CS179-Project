@@ -125,6 +125,7 @@ class mainApp{
         float calculateLeftSideWeight(State&);
         float calculateRightSideWeight(State&);
         float calculateBalance(State&);
+        string generateBalanceString(State);
         stack<Container> balanceList(State&);
         void balance_one(State&, Container);
         bool moveContainerBalance(int column, Container&, State&, int);
@@ -132,7 +133,7 @@ class mainApp{
         bool siftCheck();
         pair<int,int> findNearestContainer(int, pair<int,int>, State);
         State siftProcedure();
-        int calcMisplaced(State&);
+        //int calcMisplaced(State&);
 
         int ROW_SHIP = 8;
         int COLUMN_SHIP = 12;
