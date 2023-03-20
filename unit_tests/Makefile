@@ -17,7 +17,7 @@
 GTEST_DIR= ../googletest/googletest
 
 # Where to find user code.
-USER_DIR=.
+USER_DIR= .
 
 # Flags passed to the preprocessor.
 # Set Google Test's header directory as a system directory, such that
@@ -71,8 +71,11 @@ gtest_main.a : gtest-all.o gtest_main.o
 # gtest_main.a, depending on whether it defines its own main()
 # function.
 
+mainApp.o : ../src/mainApp.cpp 
+	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -c $(USER_DIR) ../src/mainApp.cpp
+
 gtest.o : $(USER_DIR) gtest.cpp $(GTEST_HEADERS)
 	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -c $(USER_DIR) gtest.cpp
 
-gtest : gtest.o gtest_main.a
+gtest : gtest.o mainApp.o gtest_main.a
 	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -lpthread $^ -o $@

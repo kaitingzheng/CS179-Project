@@ -31,8 +31,13 @@
 *.out
 *.app
 
-c_cpp_properties.json
+# Json
+*.Json
 
-include
-lib
-googletest
+# Include file and lib
+/include
+/lib
+
+*.txt
+
+Makefile
