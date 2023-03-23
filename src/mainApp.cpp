@@ -1196,7 +1196,7 @@ stack<Container> mainApp::balanceList(State &currState) {
         else if ((rightSideWeight/leftSideWeight) > 1.1) { // less weight on left than right
             //std::cout <<"less weight on left than right" << std::endl;
             for (int i = 7; i > -1; i--) {
-                for (int j = 11; j > 5; j--) {
+                for (int j = 6; j < 12; j++) {
                     if (currState.ship[i][j].status == USED) {
                         float dif = abs((leftSideWeight + currState.ship[i][j].container.weight) - (rightSideWeight - currState.ship[i][j].container.weight));
                         if ( dif < differenceWeight ) {
