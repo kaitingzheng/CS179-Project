@@ -771,7 +771,7 @@ bool mainApp::siftCheck() {
     int noChange = 0;
     int moveNumber = -1;
     while(1) {
-        if (noChange > 10) {
+        if (noChange > 500) {
             break;
         }
         for (int i = 0; i < weightList1.size(); i++) {
