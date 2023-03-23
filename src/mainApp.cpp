@@ -1309,44 +1309,7 @@ void mainApp::balance_one(State &currState, Container curr) {
 bool mainApp::moveContainerBalance(int destColumn, Container &container, State &currState, int status){ //can be recursive 
         if ((container.numContainerAbove > 0) && (status != 3)) {
             //std::cout <<"Other containers are above the selected one: " << std::endl;
-            /*
-            for (int i = 7; i > container.XY.first; i--) {
-                if (currState.ship[i][container.XY.second].status == USED) {
-                    container = currState.ship[i][container.XY.second].container;
-                    break;for (int i = 7; i > -1; i--) {
-                for (int j = 0; j < 12; j++) {
-                    if (currState.ship[i][j].status == UNUSED) {
-                        cout << "000" << " | ";
-                    }
-                    else if (currState.ship[i][j].status == NOTEXIST) {
-                        cout << "---" << " | ";
-                    }
-                    else {
-                        cout << currState.ship[i][j].container.description << " | ";
-                    }
-                }
-                cout << endl;
-            }
-            
-            cout << "_______________________________________"<<endl;
-
-            for (int i = 7; i > -1; i--) {
-                        for (int j = 0; j < 12; j++) {
-                                if (currState.ship[i][j].status == USED) {
-                                        cout << currState.ship[i][j].container.weight << " | ";
-                                }
-                                else if (currState.ship[i][j].status == NOTEXIST) {
-                                        cout << "----" << " | ";
-                                }
-                                else {
-                                    cout << "UNUSED" << " | ";
-                                }
-                        }
-                        cout << endl;
-                }
-                }
-            }
-            */
+          
         }
         
         if ((container.XY.second > -1) && (status == 3)) {
@@ -1422,8 +1385,6 @@ bool mainApp::moveContainerBalance(int destColumn, Container &container, State &
                     cout << currState.numOfcontainerInColumn[i].first << ", " << currState.numOfcontainerInColumn[i].second << endl;
                 }*/
 
-                timeToMove += 2;
-
                 addMoveOrder(currState,orig,highestColumnBetween,dest);
             }
             else{
@@ -1497,9 +1458,6 @@ bool mainApp::moveContainerBalance(int destColumn, Container &container, State &
                     
                     cout << currState.numOfcontainerInColumn[i].first << ", " << currState.numOfcontainerInColumn[i].second << endl;
                 }*/
-
-                timeToMove += 2;
-
                 addMoveOrder(currState,orig,highestColumnBetween,dest);
                 
             }
