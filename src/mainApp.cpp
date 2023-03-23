@@ -1307,10 +1307,6 @@ void mainApp::balance_one(State &currState, Container curr) {
     }
 
 bool mainApp::moveContainerBalance(int destColumn, Container &container, State &currState, int status){ //can be recursive 
-        if ((container.numContainerAbove > 0) && (status != 3)) {
-            //std::cout <<"Other containers are above the selected one: " << std::endl;
-          
-        }
         
         if ((container.XY.second > -1) && (status == 3)) {
             //cout << "wait how? " << endl;
@@ -1487,7 +1483,7 @@ bool mainApp::moveContainerBalance(int destColumn, Container &container, State &
 void mainApp::moveToBufferBalance(State &currState, Container container){
 
     if(currState.buffer.empty()){
-        cout << "buffer is empty" << endl;
+        //cout << "buffer is empty" << endl;
         container.XY.first = 0;
         container.XY.second = COLUMN_BUFFER-1;
         currState.buffer.push(container);
