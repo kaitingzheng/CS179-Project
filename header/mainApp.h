@@ -45,11 +45,6 @@ struct State{
     int time = 0;
     int cost = 0;
     int depth = 0;
-    int balanceDifference = 99999;
-    //int selectedContWeight = 0;
-    //int misplacedTiles = 0;
-    int estRemainingCost = 9999999;
-    //float balance = 0;
     pair<int,int> craneLocation;
     
 
@@ -75,6 +70,7 @@ class balanceCompare{
     public:
         bool operator()(State &a, State &b){
            return a.cost > b.cost;
+
         }
 };
 
@@ -122,7 +118,7 @@ class mainApp{
 
         float calculateLeftSideWeight(State&);
         float calculateRightSideWeight(State&);
-        float calculateBalance(State&);
+      
         string generateBalanceString(State);
         stack<Container> balanceList(State&);
         void balance_one(State&, Container);
@@ -154,6 +150,7 @@ class mainApp{
         vector<pair<int,int>> getNextMoveSequence();
         int getEstimatedTimeInMin();
         State unload_load(vector<string>&, vector<Container>&);
+        float calculateBalance(State&);
         void addComments(string);
         int numOfMovesRemain();
         
