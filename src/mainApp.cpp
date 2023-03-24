@@ -707,7 +707,7 @@ State mainApp::balanceSearch(){ //balance
             float curBal = calculateBalance(currState);
             currState.depth++;
                 //currState.balance = curBal;
-            if( (curBal > 0.89) && (curBal < 1.11) && (currState.buffer.empty())){
+            if( (curBal >= 0.9) && (curBal <= 1.1) && (currState.buffer.empty())){
                 // found best solution
                 //std::cout << "goal reached" << std::endl;
                 //std::cout << calculateBalance(currState) << std::endl;
@@ -781,7 +781,7 @@ bool mainApp::siftCheck() {
             weight2 += weightList2.at(i).weight;
         }
         //cout << weight2/weight1 << endl;
-        if ((weight2/weight1) > 0.89 && (weight2/weight1) < 1.11) {
+        if ((weight2/weight1) >= 0.9 && (weight2/weight1) <= 1.1) {
             return false;
         }
         else if ((weight2/weight1) < 0.9) { //less weight on right side then left
