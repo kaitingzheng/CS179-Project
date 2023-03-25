@@ -118,6 +118,7 @@ class mainApp{
 
         float calculateLeftSideWeight(State&);
         float calculateRightSideWeight(State&);
+        float calculateBalance(State&);
       
         string generateBalanceString(State);
         stack<Container> balanceList(State&);
@@ -150,7 +151,7 @@ class mainApp{
         vector<pair<int,int>> getNextMoveSequence();
         int getEstimatedTimeInMin();
         State unload_load(vector<string>&, vector<Container>&);
-        float calculateBalance(State&);
+   
         void addComments(string);
         int numOfMovesRemain();
         
