@@ -662,7 +662,7 @@ string mainApp::generateBalanceString(State currState) { //pseudohash
 
 State mainApp::balanceSearch(){ //balance
 	if (siftCheck()) {
-        //cout << "SIFT is necessary" << endl;
+        cout << "SIFT is necessary" << endl;
         return siftProcedure();
     }
     
@@ -957,7 +957,7 @@ State mainApp::siftProcedure() {
         if (checkCorrectPosVal == false) {
             choosePos = 0; // avoid edge case
         }
-        cout << choosePos << endl;
+        //cout << choosePos << endl;
         pair<int,int> containerOrig = findNearestContainer(weightList.at(choosePos), destList.at(choosePos), currState);
         Container& currContainer = currState.ship[containerOrig.first][containerOrig.second].container;
         //cout << "Coordinates: " << destList.at(0).first << ", " << destList.at(0).second << " | currContainer: " << currContainer.description << ", "<< currContainer.weight << endl;
