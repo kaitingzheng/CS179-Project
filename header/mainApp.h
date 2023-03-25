@@ -118,7 +118,7 @@ class mainApp{
 
         float calculateLeftSideWeight(State&);
         float calculateRightSideWeight(State&);
-        float calculateBalance(State&);
+        
       
         string generateBalanceString(State);
         stack<Container> balanceList(State&);
@@ -155,6 +155,7 @@ class mainApp{
         void addComments(string);
         int numOfMovesRemain();
         
+        float calculateBalance(State&);
 
         Container getContainer(int, int);
         
